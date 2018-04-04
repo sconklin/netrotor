@@ -1,0 +1,7 @@
+{
+    "Rotators": [
+        { "name":"RotorOne", "port":"/dev/USB/something", "port_speed":9600, "model":307 },
+        { "name":"RotorTwo", "port":"/dev/USB/somethingelse", "port_speed":9600, "model":307 }
+    ],
+    "something": ["GroupA"]
+}
