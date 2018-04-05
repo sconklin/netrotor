@@ -33,6 +33,9 @@ func main() {
     for {
         msg := fmt.Sprintf("hexbeam-rotor@%d", i)
         i+=2
+        if i > 365 {
+           i = 0
+        }
         buf := []byte(msg)
         _,err := Conn.Write(buf)
         if err != nil {
