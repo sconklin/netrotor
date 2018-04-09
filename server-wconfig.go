@@ -41,10 +41,10 @@ func readConfig(jsonFileName string, rotorData map[string]map[string]string, oth
 		var rname string
 
 		if val, ok := re["name"]; ok {
-			rname = val
-		} else {
 			return fmt.Errorf("Rotator config found with no name defined: %v\n", re)
 		}
+
+		rname = val
 
 		// TODO if we have restirctions like no spaces in names, enforce it here
 		fmt.Printf("Rotor name: %s\n", rname)
