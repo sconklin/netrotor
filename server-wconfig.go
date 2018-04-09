@@ -14,13 +14,12 @@ import (
 	"os"
 )
 
-type Configuration struct {
+type Config struct {
 	Rotators []string `json:"Users"`
 	Groups   []string `json:"Groups"`
 }
 
 func readConfig(jsonFileName string, rotorData map[string]map[string]string, otherData map[string]string) error {
-
 	file, err := os.Open(jsonFileName)
 
 	if err != nil {
@@ -30,21 +29,21 @@ func readConfig(jsonFileName string, rotorData map[string]map[string]string, oth
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	configuration := Configuration{}
-	err = decoder.Decode(&configuration)
+	config := Config{}
+	err = decoder.Decode(&config)
 
 	if err != nil {
 		return err
 	}
 
-	for _, re := range configuration.Rotators {
+	for _, re := range config.Rotators {
 		// TODO if we have restirctions like no spaces in names, enforce it here
 		fmt.Printf("Rotor name: %s\n", re)
 
 		// Here I'll read the rest of the config parts, and put them in the rotorData map for use in main()
 	}
 
-	fmt.Printf("Groups: %#v\n", configuration.Groups)
+	fmt.Printf("Groups: %#v\n", config.Groups)
 
 	return nil
 }
