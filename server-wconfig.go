@@ -1,6 +1,7 @@
 /*
  * N1MM broadcasts Rotator commands from port 12040
  * Rotator status we send are sent from port 13010
+ *
  * https://stackoverflow.com/questions/16465705/how-to-handle-configuration-in-go
  */
 
@@ -18,21 +19,22 @@ type Configuration struct {
 	AnotherThing string
 }
 
-func readConfig(jsonFileName string, rotorData map[string]map[string]string, otherData map[string]string) {
+func readConfig(jsonFileName string, rotorData map[string]map[string]string, otherData map[string]string) error {
 
 	file, err := os.Open(jsonFileName)
+
 	if err != nil {
-		fmt.Printf("Unable to open config file: <%s>\n", err)
-		os.Exit(1)
+		return err
 	}
 
 	defer file.Close()
+
 	decoder := json.NewDecoder(file)
 	configuration := Configuration{}
 	err = decoder.Decode(&configuration)
+
 	if err != nil {
-		fmt.Println("error1:", err)
-		os.Exit(1)
+		return err
 	}
 
 	for _, re := range configuration.Rotators {
@@ -41,9 +43,9 @@ func readConfig(jsonFileName string, rotorData map[string]map[string]string, oth
 		if val, ok := re["name"]; ok {
 			rname = val
 		} else {
-			fmt.Printf("Rotator config found with no name defined: %v\n", re)
-			os.Exit(1)
+			return fmt.Errorf("Rotator config found with no name defined: %v\n", re)
 		}
+
 		// TODO if we have restirctions like no spaces in names, enforce it here
 		fmt.Printf("Rotor name: %s\n", rname)
 
@@ -51,6 +53,8 @@ func readConfig(jsonFileName string, rotorData map[string]map[string]string, oth
 	}
 
 	fmt.Printf("%s\n", configuration.AnotherThing)
+
+	return nil
 }
 
 /* A Simple function to verify error */
@@ -65,7 +69,10 @@ func main() {
 	var rotors map[string]map[string]string
 	var otherConfig map[string]string
 
-	readConfig("multirotorconf.json", rotors, otherConfig)
+	if err := readConfig("multirotorconf.json", rotors, otherConfig); err != nil {
+		fmt.Printf("readConfig() returned %v\n", err)
+		os.Exit(0)
+	}
 
 	// ignore the rest for now
 	os.Exit(0)
