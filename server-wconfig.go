@@ -15,8 +15,8 @@ import (
 )
 
 type Configuration struct {
-	Rotators     []map[string]string
-	AnotherThing string
+	Rotators []string `json:"Users"`
+	Groups   []string `json:"Groups"`
 }
 
 func readConfig(jsonFileName string, rotorData map[string]map[string]string, otherData map[string]string) error {
@@ -38,19 +38,13 @@ func readConfig(jsonFileName string, rotorData map[string]map[string]string, oth
 	}
 
 	for _, re := range configuration.Rotators {
-		rname, ok := re["name"]
-
-		if ok == false {
-			return fmt.Errorf("Rotator config found with no name defined: %v\n", re)
-		}
-
 		// TODO if we have restirctions like no spaces in names, enforce it here
-		fmt.Printf("Rotor name: %s\n", rname)
+		fmt.Printf("Rotor name: %s\n", re)
 
 		// Here I'll read the rest of the config parts, and put them in the rotorData map for use in main()
 	}
 
-	fmt.Printf("%s\n", configuration.AnotherThing)
+	fmt.Printf("Groups: %#v\n", configuration.Groups)
 
 	return nil
 }
@@ -67,7 +61,7 @@ func main() {
 	var rotors map[string]map[string]string
 	var otherConfig map[string]string
 
-	if err := readConfig("multirotorconf.json", rotors, otherConfig); err != nil {
+	if err := readConfig("rotorconf.json", rotors, otherConfig); err != nil {
 		fmt.Printf("readConfig() returned %v\n", err)
 		os.Exit(0)
 	}
