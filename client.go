@@ -1,4 +1,4 @@
-package main
+package rotor
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func CheckError(err error) {
  * https://stackoverflow.com/questions/16465705/how-to-handle-configuration-in-go
  */
 
-func main() {
+func Client() {
 	ServerAddr, err := net.ResolveUDPAddr("udp", "255.255.255.255:13010")
 	CheckError(err)
 

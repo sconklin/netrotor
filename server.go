@@ -1,18 +1,9 @@
-package main
+package rotor
 
 import (
 	"fmt"
 	"net"
-	"os"
 )
-
-/* A Simple function to verify error */
-func CheckError(err error) {
-	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(0)
-	}
-}
 
 /*
  * N1MM broadcasts Rotator commands from port 12040
@@ -20,7 +11,7 @@ func CheckError(err error) {
  * https://stackoverflow.com/questions/16465705/how-to-handle-configuration-in-go
  */
 
-func main() {
+func Server() {
 	/* Lets prepare a address to listen from any address sending at port 12040*/
 	ServerAddr, err := net.ResolveUDPAddr("udp", ":12040")
 	CheckError(err)
