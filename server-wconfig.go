@@ -46,7 +46,7 @@ func readConfig(jsonFileName string) (*Config, error) {
 	return &config, nil
 }
 
-/* A Simple function to verify error */
+// A Simple function to verify error
 func CheckError(err error) {
 	if err != nil {
 		fmt.Println("Error: ", err)
@@ -62,22 +62,25 @@ func main() {
 		os.Exit(0)
 	}
 
+	// if you really want your rotor data in a map with the rotor name as
+	// the key, you can do something like the following:
+
+	rotMap := make(map[string]Rotator)
+
 	for _, rot := range config.Rotators {
-		// TODO if we have restirctions like no spaces in names, enforce it here
-		fmt.Printf("Rotor name: %s\n", rot.Name)
-		// Here I'll read the rest of the config parts, and put them in the rotorData map for use in main()
+		rotMap[rot.Name] = rot
 	}
 
-	fmt.Printf("Groups: %#v\n", config.Groups)
+	fmt.Printf("rotator map: %#v\n", rotMap)
 
 	// ignore the rest for now
 	os.Exit(0)
 
-	/* Lets prepare a address to listen from any address sending at port 12040*/
+	// Lets prepare a address to listen from any address sending at port 12040
 	ServerAddr, err := net.ResolveUDPAddr("udp", ":12040")
 	CheckError(err)
 
-	/* Now listen at selected port */
+	// Now listen at selected port
 	ServerConn, err := net.ListenUDP("udp", ServerAddr)
 	CheckError(err)
 	defer ServerConn.Close()
