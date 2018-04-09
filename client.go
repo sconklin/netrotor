@@ -12,15 +12,24 @@ import (
  * https://stackoverflow.com/questions/16465705/how-to-handle-configuration-in-go
  */
 
-func Client() {
+func Client() error {
 	ServerAddr, err := net.ResolveUDPAddr("udp", "255.255.255.255:13010")
-	CheckError(err)
+
+	if err != nil {
+		return err
+	}
 
 	LocalAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:")
-	CheckError(err)
+
+	if err != nil {
+		return err
+	}
 
 	Conn, err := net.DialUDP("udp", LocalAddr, ServerAddr)
-	CheckError(err)
+
+	if err != nil {
+		return err
+	}
 
 	defer Conn.Close()
 	i := 0
@@ -37,4 +46,6 @@ func Client() {
 		}
 		time.Sleep(time.Second * 1)
 	}
+
+	return nil
 }

@@ -11,14 +11,21 @@ import (
  * https://stackoverflow.com/questions/16465705/how-to-handle-configuration-in-go
  */
 
-func Server() {
+func Server() error {
 	/* Lets prepare a address to listen from any address sending at port 12040*/
 	ServerAddr, err := net.ResolveUDPAddr("udp", ":12040")
-	CheckError(err)
+
+	if err != nil {
+		return err
+	}
 
 	/* Now listen at selected port */
 	ServerConn, err := net.ListenUDP("udp", ServerAddr)
-	CheckError(err)
+
+	if err != nil {
+		return err
+	}
+
 	defer ServerConn.Close()
 
 	buf := make([]byte, 1024)
@@ -31,4 +38,6 @@ func Server() {
 			fmt.Println("Error: ", err)
 		}
 	}
+
+	return nil
 }
