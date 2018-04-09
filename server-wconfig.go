@@ -14,9 +14,17 @@ import (
 	"os"
 )
 
+type Rotator struct {
+	Name      string `json:"name"`
+	Port      string `json:"port"`
+	PortSpeed string `json:"port_speed"`
+	Model     string `json:"model"`
+}
+
 type Config struct {
-	Rotators []string `json:"Users"`
-	Groups   []string `json:"Groups"`
+	Rotators     []Rotator `json:"Rotators"`
+	Groups       []string  `json:"Groups"`
+	AnotherThing string
 }
 
 func readConfig(jsonFileName string) (*Config, error) {
@@ -47,16 +55,16 @@ func CheckError(err error) {
 }
 
 func main() {
-	config, err := readConfig("rotorconf.json")
+	config, err := readConfig("multirotorconf.json")
 
 	if err != nil {
 		fmt.Printf("readConfig() returned %v\n", err)
 		os.Exit(0)
 	}
 
-	for _, re := range config.Rotators {
+	for _, rot := range config.Rotators {
 		// TODO if we have restirctions like no spaces in names, enforce it here
-		fmt.Printf("Rotor name: %s\n", re)
+		fmt.Printf("Rotor name: %s\n", rot.Name)
 		// Here I'll read the rest of the config parts, and put them in the rotorData map for use in main()
 	}
 
