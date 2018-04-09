@@ -19,11 +19,11 @@ type Config struct {
 	Groups   []string `json:"Groups"`
 }
 
-func readConfig(jsonFileName string, rotorData map[string]map[string]string, otherData map[string]string) error {
+func readConfig(jsonFileName string) (*Config, error) {
 	file, err := os.Open(jsonFileName)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer file.Close()
@@ -33,19 +33,10 @@ func readConfig(jsonFileName string, rotorData map[string]map[string]string, oth
 	err = decoder.Decode(&config)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	for _, re := range config.Rotators {
-		// TODO if we have restirctions like no spaces in names, enforce it here
-		fmt.Printf("Rotor name: %s\n", re)
-
-		// Here I'll read the rest of the config parts, and put them in the rotorData map for use in main()
-	}
-
-	fmt.Printf("Groups: %#v\n", config.Groups)
-
-	return nil
+	return &config, nil
 }
 
 /* A Simple function to verify error */
@@ -57,13 +48,20 @@ func CheckError(err error) {
 }
 
 func main() {
-	var rotors map[string]map[string]string
-	var otherConfig map[string]string
+	config, err := readConfig("rotorconf.json")
 
-	if err := readConfig("rotorconf.json", rotors, otherConfig); err != nil {
+	if err != nil {
 		fmt.Printf("readConfig() returned %v\n", err)
 		os.Exit(0)
 	}
+
+	for _, re := range config.Rotators {
+		// TODO if we have restirctions like no spaces in names, enforce it here
+		fmt.Printf("Rotor name: %s\n", re)
+		// Here I'll read the rest of the config parts, and put them in the rotorData map for use in main()
+	}
+
+	fmt.Printf("Groups: %#v\n", config.Groups)
 
 	// ignore the rest for now
 	os.Exit(0)
