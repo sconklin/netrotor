@@ -38,13 +38,11 @@ func readConfig(jsonFileName string, rotorData map[string]map[string]string, oth
 	}
 
 	for _, re := range configuration.Rotators {
-		var rname string
+		rname, ok := re["name"]
 
-		if val, ok := re["name"]; ok {
+		if ok == false {
 			return fmt.Errorf("Rotator config found with no name defined: %v\n", re)
 		}
-
-		rname = val
 
 		// TODO if we have restirctions like no spaces in names, enforce it here
 		fmt.Printf("Rotor name: %s\n", rname)
