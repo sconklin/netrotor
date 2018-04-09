@@ -30,9 +30,8 @@ func readConfig(jsonFileName string) (*Config, error) {
 
 	decoder := json.NewDecoder(file)
 	config := Config{}
-	err = decoder.Decode(&config)
 
-	if err != nil {
+	if err = decoder.Decode(&config); err != nil {
 		return nil, err
 	}
 
