@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-func CheckError(err error) {
-	if err != nil {
-		fmt.Println("Error: ", err)
-	}
-}
-
 /*
  * N1MM broadcasts Rotator commands from port 12040
  * Rotator status we send are sent from port 13010
