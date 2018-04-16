@@ -1,16 +1,22 @@
 {
     "Rotators": [
         {
-					"name": "RotorOne",
-					"port":"/dev/USB/something",
-					"port_speed":"9600",
-					"model":"307" 
-				}, {
-					"name": "RotorTwo",
-					"port":"/dev/USB/somethingelse",
-					"port_speed": "9600",
-					"model":"307"
-				}
+	    "name": "Rotor1",
+	    "port":"/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0",
+	    "port_speed":"4800",
+	    "model":"603" 
+	},
+        {
+	    "name": "Rotor1",
+	    "port":"/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port1",
+	    "port_speed":"4800",
+	    "model":"603" 
+	}
     ],
-    "AnotherThing":"astringvalue"
+    "Network":
+        {
+	    "rotorrx":  "12040",
+	    "rotortx":  "13010",
+	    "statusrx": "12060"
+	}
 }

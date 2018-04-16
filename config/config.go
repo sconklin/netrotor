@@ -19,10 +19,15 @@ type Rotator struct {
 	Model     string `json:"model"`
 }
 
+type Net struct {
+	RotorRx  string `json:"rotorrx"`
+	RotorTx  string `json:"rotortx"`
+	StatusRx string `json:"statusrx"`
+}
+
 type Config struct {
-	Rotators     []Rotator `json:"Rotators"`
-	Groups       []string  `json:"Groups"`
-	AnotherThing string
+	Rotators []Rotator `json:"Rotators"`
+	Network  Net       `json:"Network"`
 }
 
 func ReadConfig(jsonFileName string) (*Config, error) {
