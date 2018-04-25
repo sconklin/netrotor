@@ -6,3 +6,10 @@ It will poll the rotator using rotctl, and broadcast the position using UDP pack
 
 It will also listen for packets sent by N1MM commanding a movement, and pass those to the rotator using rotctl.
 
+On Ubuntu, UDP is blocked by default by Ubuntu Firewall (ufw). To open ports, do this:
+
+```sudo ufw allow 13010/udp
+```
+
+For N1MM, Port 12060 is used for status and 13010 is used for rotor updates
+
