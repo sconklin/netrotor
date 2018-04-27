@@ -9,6 +9,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -47,4 +48,18 @@ func ReadConfig(jsonFileName string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func DumpConfig(conf *Config) {
+	fmt.Printf("Rotators:\n")
+	for _, rotator := range conf.Rotators {
+		fmt.Printf("    Name:  %s\n", rotator.Name)
+		fmt.Printf("    Model: %s\n", rotator.Model)
+		fmt.Printf("    Port:  %s\n", rotator.Port)
+		fmt.Printf("    Speed: %s\n", rotator.PortSpeed)
+	}
+	fmt.Printf("Network:\n")
+	fmt.Printf("    Rotor Rx:  %s\n", conf.Network.RotorRx)
+	fmt.Printf("    Rotor Tx:  %s\n", conf.Network.RotorTx)
+	fmt.Printf("    Status Rx: %s\n", conf.Network.StatusRx)
 }
