@@ -2,6 +2,7 @@ package main
 
 import (
 	"./config"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -16,21 +17,27 @@ type Rinfo struct {
 }
 
 func main() {
+	var verbose = flag.Bool("v", false, "Enable verbose output")
+	flag.Parse()
+
 	quit := make(chan bool)
 	errc := make(chan error)
 	pos := make(chan Rinfo)
 
 	conf, err := config.ReadConfig("rotorconf.json")
-
 	if err != nil {
 		fmt.Println("Error: ", err)
 		os.Exit(1)
 	}
 
-	/*config.DumpConfig(conf)*/
+	if *verbose {
+		config.DumpConfig(conf)
+	}
 
 	for _, rotator := range conf.Rotators {
-		fmt.Print("For each rotator\n")
+		if *verbose {
+			fmt.Printf("Starting reads for rotator %s\n", rotator.Name)
+		}
 		go func(rotator config.Rotator) {
 			tLast := time.Now()
 			var posLast float64 = 0.0
@@ -54,7 +61,6 @@ func main() {
 					if deltap < 0 {
 						deltap = deltap * -1
 					}
-
 					if (deltap > 1) || (time.Now().Sub(tLast) > (15 * time.Second)) {
 						pos <- Rinfo{azI, rotator.Name}
 						posLast = azI
