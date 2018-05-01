@@ -4,6 +4,7 @@ import (
 	"./config"
 	"flag"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"strconv"
@@ -16,13 +17,20 @@ type Rinfo struct {
 	Name    string
 }
 
+func extractTag(inp, tag string) string {
+	bar := strings.Split(strings.Split(inp, "</"+tag+">")[0], "<"+tag+">")
+	return bar[len(bar)-1]
+}
+
 func main() {
 	var verbose = flag.Bool("v", false, "Enable verbose output")
 	flag.Parse()
 
 	quit := make(chan bool)
 	errc := make(chan error)
-	pos := make(chan Rinfo)
+	readpos := make(chan Rinfo)
+	cmdpos := make(chan Rinfo)
+	writepos := make(chan Rinfo)
 
 	conf, err := config.ReadConfig("rotorconf.json")
 	if err != nil {
@@ -39,6 +47,7 @@ func main() {
 			fmt.Printf("Starting reads for rotator %s\n", rotator.Name)
 		}
 		go func(rotator config.Rotator) {
+			/* Read rotor positions and send commands using serial port */
 			tLast := time.Now()
 			var posLast float64 = 0.0
 			var deltap float64 = 0.0
@@ -48,7 +57,6 @@ func main() {
 				cmdargs := fmt.Sprintf("/usr/bin/rotctl -m %s -r %s -s %s get_pos", rotator.Model, rotator.Port, rotator.PortSpeed)
 				out, err := exec.Command("bash", "-c", cmdargs).Output()
 				if err != nil {
-					fmt.Println(err)
 					errc <- err
 				} else {
 					result := string(out)
@@ -62,7 +70,7 @@ func main() {
 						deltap = deltap * -1
 					}
 					if (deltap > 1) || (time.Now().Sub(tLast) > (15 * time.Second)) {
-						pos <- Rinfo{azI, rotator.Name}
+						readpos <- Rinfo{azI, rotator.Name}
 						posLast = azI
 						tLast = time.Now()
 					}
@@ -72,24 +80,123 @@ func main() {
 					return
 				case <-quit:
 					return
-				default:
+				case <-time.After(1 * time.Second):
+				case newpos := <-writepos:
+					if strings.Compare(newpos.Name, rotator.Name) == 0 {
+						/* We received a request to write a position to this rotator */
+						cmdargs := fmt.Sprintf("/usr/bin/rotctl -m %s -r %s -s %s set_pos %4.1f 0", rotator.Model, rotator.Port, rotator.PortSpeed, newpos.Azimuth)
+						_, err := exec.Command("bash", "-c", cmdargs).Output()
+						if err != nil {
+							/* we have to ignore this due to a bug in hamlib */
+							if err.Error() != "exit status 2" {
+								fmt.Println("Error while writing position")
+								errc <- err
+							}
+						}
+					}
 				}
-				time.Sleep(1000 * time.Millisecond)
 			}
 		}(rotator)
 	}
 
+	go func() {
+		/* Listen for rotor commands on UDP port*/
+		rxport := ":" + conf.Network.RotorRx
+		RxAddr, err := net.ResolveUDPAddr("udp", rxport)
+		if err != nil {
+			fmt.Println(err)
+			errc <- err
+		}
+		RxConn, err := net.ListenUDP("udp", RxAddr)
+		if err != nil {
+			fmt.Println(err)
+			errc <- err
+		}
+		defer RxConn.Close()
+		buf := make([]byte, 1024)
+		var azI float64 = 0.0
+		for {
+			_, _, err := RxConn.ReadFromUDP(buf)
+			if err != nil {
+				fmt.Println("UDP RX Error: ", err)
+				errc <- err
+			}
+			/* we got a command - parse and send */
+			instr := string(buf)
+			if *verbose {
+				fmt.Println("Pkt Received ", instr)
+			}
+			/* our parsing is pretty simple */
+			if strings.HasPrefix(instr, "<N1MMRotor><rotor>") {
+				rotor := extractTag(instr, "rotor")
+				azi := extractTag(instr, "goazi")
+				offset := extractTag(instr, "offset")
+				bi := extractTag(instr, "bidirectional")
+				freq := extractTag(instr, "freqband")
+
+				if *verbose {
+					fmt.Println("           Rotor: ", rotor)
+					fmt.Println("         Azimuth: ", azi)
+					fmt.Println("          Offset: ", offset)
+					fmt.Println("   Bidirectional: ", bi)
+					fmt.Println("        Freqband: ", freq)
+				}
+				azI, _ = strconv.ParseFloat(azi, 64)
+				cmdpos <- Rinfo{azI, rotor}
+			}
+			select {
+			case <-errc:
+				return
+			case <-quit:
+				return
+			default:
+			}
+		}
+	}()
+
+	/* main action loop */
 	for {
+		/* TODO Make the netmask a config variable */
+		txport := "255.255.255.255:" + conf.Network.RotorTx
+		TxAddr, err := net.ResolveUDPAddr("udp", txport)
+		if err != nil {
+			fmt.Println(err)
+			errc <- err
+		}
+		LocalAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:0")
+		if err != nil {
+			fmt.Println(err)
+			errc <- err
+		}
+
+		TxConn, err := net.DialUDP("udp", LocalAddr, TxAddr)
+		if err != nil {
+			fmt.Println(err)
+			errc <- err
+		}
+		defer TxConn.Close()
+
 		select {
 		case <-errc:
 			fmt.Printf("Quitting . . . \n")
 			close(quit)
 			return
-		case p := <-pos:
-			fmt.Printf("MAIN LOOP Rotor <%s> Position: %f\n", p.Name, p.Azimuth)
+		case p := <-readpos:
 			/* Send the UDP packet with rotator position */
-			/* first see if we have a conflicting name with a received value? */
-			/*default: */
+			outstr := fmt.Sprintf("%s @ %d", p.Name, int(p.Azimuth*10))
+			if *verbose {
+				fmt.Printf("Sending UDP: <%s>\n", outstr)
+			}
+			_, err := TxConn.Write([]byte(outstr))
+			if err != nil {
+				errc <- err
+			}
+		case p := <-cmdpos:
+			/* validate and send to all attached rotors */
+			if *verbose {
+				fmt.Printf("Received UDP command: <%s> to %f\n", p.Name, p.Azimuth)
+			}
+			writepos <- p
 		}
 	}
 }
