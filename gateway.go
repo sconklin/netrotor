@@ -163,7 +163,7 @@ func main() {
 			fmt.Println(err)
 			errc <- err
 		}
-		LocalAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:0")
+		LocalAddr, err := net.ResolveUDPAddr("udp", ":0")
 		if err != nil {
 			fmt.Println(err)
 			errc <- err
