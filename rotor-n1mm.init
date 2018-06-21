@@ -1,8 +1,10 @@
 #!/bin/bash
-# rotor-n1mm daemon
-# chkconfig: 2345 95 05
-# description: rotor-n1mm daemon
-# processname: gateway
+### BEGIN INIT INFO
+# Provides: 
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Description: rotor-n1mm daemon
+### END INIT INFO
 
 DAEMON_PATH="/home/pi/go/rotor-n1mm"
 
