@@ -57,13 +57,19 @@ func main() {
 				cmdargs := fmt.Sprintf("/usr/bin/rotctl -m %s -r %s -s %s get_pos", rotator.Model, rotator.Port, rotator.PortSpeed)
 				out, err := exec.Command("bash", "-c", cmdargs).Output()
 				if err != nil {
+				       if *verbose {
+				       	  fmt.Println(err)
+				       }
 					errc <- err
 				} else {
 					result := string(out)
 					azimuth := strings.Split(result, "\n")[0]
 					azI, err = strconv.ParseFloat(azimuth, 64)
 					if err != nil {
-						errc <- err
+				           if *verbose {
+				       	      fmt.Println(err)
+					   }
+					   errc <- err
 					}
 					deltap = azI - posLast
 					if deltap < 0 {
