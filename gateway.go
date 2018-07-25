@@ -129,9 +129,6 @@ func main() {
 			}
 			/* we got a command - parse and send */
 			instr := string(buf)
-			if *verbose {
-				fmt.Println("Pkt Received ", instr)
-			}
 			/* our parsing is pretty simple */
 			if strings.HasPrefix(instr, "<N1MMRotor><rotor>") {
 				rotor := extractTag(instr, "rotor")
@@ -149,6 +146,10 @@ func main() {
 				}
 				azI, _ = strconv.ParseFloat(azi, 64)
 				cmdpos <- Rinfo{azI, rotor}
+			} else {
+			  if *verbose {
+			     fmt.Println("Odd Pkt Received ", instr)
+			  }
 			}
 			select {
 			case <-errc:
@@ -190,9 +191,11 @@ func main() {
 		case p := <-readpos:
 			/* Send the UDP packet with rotator position */
 			outstr := fmt.Sprintf("%s @ %d", p.Name, int(p.Azimuth*10))
+			/*
 			if *verbose {
 				fmt.Printf("Sending UDP: <%s>\n", outstr)
 			}
+			*/
 			_, err := TxConn.Write([]byte(outstr))
 			if err != nil {
 				errc <- err
