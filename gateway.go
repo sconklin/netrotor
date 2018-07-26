@@ -4,9 +4,10 @@ import (
 	"./config"
 	"flag"
 	"fmt"
+	"github.com/tarm/serial"
+	"io"
 	"net"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -52,52 +53,154 @@ func main() {
 			var posLast float64 = 0.0
 			var deltap float64 = 0.0
 			var azI float64 = 0.0
+			buf := make([]byte, 128)
 
+			speed, err := strconv.Atoi(rotator.PortSpeed)
+			if err != nil {
+				if *verbose {
+					fmt.Println(err)
+				}
+				errc <- err
+			}
+
+			c := &serial.Config{Name: rotator.Port, Baud: speed, ReadTimeout: time.Second * 1}
+			s, err := serial.OpenPort(c)
+			if err != nil {
+				if *verbose {
+					fmt.Println(err)
+				}
+				errc <- err
+			}
+			defer s.Close()
+
+			/*
+			 * "AM1;" - Start Turning
+			 * "AP1xxx;" - set azimuth, does not start turning
+			 * "AI1;" - send me your current position
+			 * ";" - stop
+			 */
 			for {
-				cmdargs := fmt.Sprintf("/usr/bin/rotctl -m %s -r %s -s %s get_pos", rotator.Model, rotator.Port, rotator.PortSpeed)
-				out, err := exec.Command("bash", "-c", cmdargs).Output()
+				/* Write command then read position */
+				n, err := s.Write([]byte("AI1;"))
 				if err != nil {
 					if *verbose {
 						fmt.Println(err)
 					}
 					errc <- err
+				}
+
+				time.Sleep(250 * time.Millisecond)
+				n, err = s.Read(buf)
+
+				if err != nil {
+					if *verbose {
+						fmt.Println("Error on Serial Read 1")
+						fmt.Println(err)
+					}
+					errc <- err
 				} else {
-					result := string(out)
-					azimuth := strings.Split(result, "\n")[0]
-					azI, err = strconv.ParseFloat(azimuth, 64)
-					if err != nil {
-						if *verbose {
-							fmt.Println(err)
+					result := string(buf[:n])
+
+					if strings.HasPrefix(result, ";") && (len(result) == 4) {
+						azint, err := strconv.Atoi(strings.TrimLeft(result, ";"))
+						if err != nil {
+							if *verbose {
+								fmt.Println(err)
+							}
+							errc <- err
 						}
-						errc <- err
+
+						azI = float64(azint)
+						deltap = azI - posLast
+						if deltap < 0 {
+							deltap = deltap * -1
+						}
+						if (deltap > 1) || (time.Now().Sub(tLast) > (15 * time.Second)) {
+							readpos <- Rinfo{azI, rotator.Name}
+							posLast = azI
+							tLast = time.Now()
+						}
+					} else {
+						if *verbose {
+							fmt.Printf("Ignoring rotor response of <%s>", result)
+						}
 					}
-					deltap = azI - posLast
-					if deltap < 0 {
-						deltap = deltap * -1
-					}
-					if (deltap > 1) || (time.Now().Sub(tLast) > (15 * time.Second)) {
-						readpos <- Rinfo{azI, rotator.Name}
-						posLast = azI
-						tLast = time.Now()
-					}
+
 				}
 				select {
 				case <-errc:
+					fmt.Printf("got an errc\n")
 					return
 				case <-quit:
 					return
 				case <-time.After(1 * time.Second):
 				case newpos := <-writepos:
 					if strings.Compare(newpos.Name, rotator.Name) == 0 {
-						/* We received a request to write a position to this rotator */
-						cmdargs := fmt.Sprintf("/usr/bin/rotctl -m %s -r %s -s %s set_pos %4.1f 0", rotator.Model, rotator.Port, rotator.PortSpeed, newpos.Azimuth)
-						_, err := exec.Command("bash", "-c", cmdargs).Output()
-						if err != nil {
-							/* we have to ignore this due to a bug in hamlib */
-							if err.Error() != "exit status 2" {
-								fmt.Println("Error while writing position")
+						fmt.Printf("Here's where we send a position\n")
+						if newpos.Azimuth > 0.0 && newpos.Azimuth < 360.0 {
+							/* it's good! */
+							sendaz := int(newpos.Azimuth + 0.5)
+							if sendaz == 360 {
+								sendaz = 0
+							}
+
+							cmd := fmt.Sprintf("AP1%03d;", sendaz)
+							if *verbose {
+								fmt.Printf("Sending command <%s>\n", cmd)
+							}
+							n, err := s.Write([]byte(cmd))
+							if err != nil {
+								if *verbose {
+									fmt.Println(err)
+								}
 								errc <- err
 							}
+							if n == 0 {
+								fmt.Printf("Serial write returned zero length\n")
+							}
+
+							cmd = fmt.Sprintf("AM1;")
+							if *verbose {
+								fmt.Printf("Sending command <%s>\n", cmd)
+							}
+							n, err = s.Write([]byte(cmd))
+							if err != nil {
+								if *verbose {
+									fmt.Println(err)
+								}
+								errc <- err
+							}
+							if n == 0 {
+								fmt.Printf("Serial write returned zero length\n")
+							}
+
+							fmt.Printf("Done sending\n")
+						} else if newpos.Azimuth < 0.0 {
+							/* negative values mean stop */
+							n, err := s.Write([]byte(";"))
+							if err != nil {
+								if *verbose {
+									fmt.Println(err)
+								}
+								errc <- err
+							}
+							if n == 0 {
+								fmt.Printf("Serial write returned zero length (2)\n")
+							}
+						} else {
+							if *verbose {
+								fmt.Printf("Ignoring invalid azimuth %f\n", newpos.Azimuth)
+							}
+						}
+
+						/* These can generate responses we don't care about - especially if you send a stop while the rotor is not turning */
+						n, err = s.Read(buf)
+						if err != nil && err != io.EOF {
+							if *verbose {
+								fmt.Println("Error on Serial Read 2")
+								fmt.Println(err)
+							}
+							errc <- err
 						}
 					}
 				}
@@ -147,9 +250,9 @@ func main() {
 				azI, _ = strconv.ParseFloat(azi, 64)
 				cmdpos <- Rinfo{azI, rotor}
 			} else {
-			  if *verbose {
-			     fmt.Println("Odd Pkt Received ", instr)
-			  }
+				if *verbose {
+					fmt.Println("Odd Pkt Received ", instr)
+				}
 			}
 			select {
 			case <-errc:
@@ -191,11 +294,9 @@ func main() {
 		case p := <-readpos:
 			/* Send the UDP packet with rotator position */
 			outstr := fmt.Sprintf("%s @ %d", p.Name, int(p.Azimuth*10))
-			/*
 			if *verbose {
 				fmt.Printf("Sending UDP: <%s>\n", outstr)
 			}
-			*/
 			_, err := TxConn.Write([]byte(outstr))
 			if err != nil {
 				errc <- err
