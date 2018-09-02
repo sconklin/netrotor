@@ -1,5 +1,12 @@
 This is a gateway between hamlib's rotctl rotor control libraries, and the network interfaces used by the N1MM ham radio logger.
 
+To make it start as a service, copy rotor-n1mm.service to /etc/systemd/system, then edit that script to point to the gateway executable.
+
+Then run the following:
+
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable rotor-n1mm.service
+
 It's designed to be run on a host that's directly connected to the rotator.
 
 It will poll the rotator using rotctl, and broadcast the position using UDP packets compatible with N1MM.
