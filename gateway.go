@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -32,7 +33,19 @@ func main() {
 	cmdpos := make(chan Rinfo)
 	writepos := make(chan Rinfo)
 
-	conf, err := config.ReadConfig("rotorconf.json")
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+	   fmt.Println("Error: ", err)
+	   os.Exit(1)
+	}
+
+    	configpath := filepath.Join(dir, "rotorconf.json")
+	if err != nil {
+	   fmt.Println("Error: ", err)
+	   os.Exit(1)
+	}
+
+	conf, err := config.ReadConfig(configpath)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		os.Exit(1)
