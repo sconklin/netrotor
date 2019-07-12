@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -35,14 +34,14 @@ func main() {
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-	   fmt.Println("Error: ", err)
-	   os.Exit(1)
+		fmt.Println("Error: ", err)
+		os.Exit(1)
 	}
 
-    	configpath := filepath.Join(dir, "rotorconf.json")
+	configpath := filepath.Join(dir, "rotorconf.json")
 	if err != nil {
-	   fmt.Println("Error: ", err)
-	   os.Exit(1)
+		fmt.Println("Error: ", err)
+		os.Exit(1)
 	}
 
 	conf, err := config.ReadConfig(configpath)
@@ -55,68 +54,44 @@ func main() {
 		config.DumpConfig(conf)
 	}
 
-	for _, rotator := range conf.Rotators {
-		if *verbose {
-			fmt.Printf("Starting reads for rotator %s\n", rotator.Name)
-		}
-		go func(rotator config.Rotator) {
-			/* Read rotor positions and send commands using serial port */
-			tLast := time.Now()
-			var posLast float64 = 0.0
-			var deltap float64 = 0.0
-			var azI float64 = 0.0
+	rotator := conf.Rotator
 
-			for {
-				cmdargs := fmt.Sprintf("/usr/bin/rotctl -m %s -r %s -s %s get_pos", rotator.Model, rotator.Port, rotator.PortSpeed)
-				out, err := exec.Command("bash", "-c", cmdargs).Output()
-				if err != nil {
-					if *verbose {
-						fmt.Println(err)
-					}
-					errc <- err
-				} else {
-					result := string(out)
-					azimuth := strings.Split(result, "\n")[0]
-					azI, err = strconv.ParseFloat(azimuth, 64)
-					if err != nil {
-						if *verbose {
-							fmt.Println(err)
-						}
-						errc <- err
-					}
-					deltap = azI - posLast
-					if deltap < 0 {
-						deltap = deltap * -1
-					}
-					if (deltap > 1) || (time.Now().Sub(tLast) > (15 * time.Second)) {
-						readpos <- Rinfo{azI, rotator.Name}
-						posLast = azI
-						tLast = time.Now()
-					}
-				}
-				select {
-				case <-errc:
-					return
-				case <-quit:
-					return
-				case <-time.After(1 * time.Second):
-				case newpos := <-writepos:
-					if strings.Compare(newpos.Name, rotator.Name) == 0 {
-						/* We received a request to write a position to this rotator */
-						cmdargs := fmt.Sprintf("/usr/bin/rotctl -m %s -r %s -s %s set_pos %4.1f 0", rotator.Model, rotator.Port, rotator.PortSpeed, newpos.Azimuth)
-						_, err := exec.Command("bash", "-c", cmdargs).Output()
-						if err != nil {
-							/* we have to ignore this due to a bug in hamlib */
-							if err.Error() != "exit status 2" {
-								fmt.Println("Error while writing position")
-								errc <- err
-							}
-						}
-					}
+	if *verbose {
+		fmt.Printf("Starting reads for rotator %s\n", rotator.Name)
+	}
+
+	go func(rotator config.Rotator) {
+		/* Read rotor position */
+		tLast := time.Now()
+		var posLast float64 = 0.0
+		var deltap float64 = 0.0
+		var azI float64 = 0.0
+
+		for {
+			/* read analog and get Az into azI */
+			deltap = azI - posLast
+			if deltap < 0 {
+				deltap = deltap * -1
+			}
+			if (deltap > 1) || (time.Now().Sub(tLast) > (15 * time.Second)) {
+				readpos <- Rinfo{azI, rotator.Name}
+				posLast = azI
+				tLast = time.Now()
+			}
+			select {
+			case <-errc:
+				return
+			case <-quit:
+				return
+			case <-time.After(1 * time.Second):
+			case newpos := <-writepos:
+				if strings.Compare(newpos.Name, rotator.Name) == 0 {
+					/* We received a request to write a position to this rotator */
+					/* send a message to the control loop with the target Az */
 				}
 			}
-		}(rotator)
-	}
+		}
+	}(rotator)
 
 	go func() {
 		/* Listen for rotor commands on UDP port*/
@@ -160,9 +135,9 @@ func main() {
 				azI, _ = strconv.ParseFloat(azi, 64)
 				cmdpos <- Rinfo{azI, rotor}
 			} else {
-			  if *verbose {
-			     fmt.Println("Odd Pkt Received ", instr)
-			  }
+				if *verbose {
+					fmt.Println("Odd Pkt Received ", instr)
+				}
 			}
 			select {
 			case <-errc:
@@ -205,9 +180,9 @@ func main() {
 			/* Send the UDP packet with rotator position */
 			outstr := fmt.Sprintf("%s @ %d", p.Name, int(p.Azimuth*10))
 			/*
-			if *verbose {
-				fmt.Printf("Sending UDP: <%s>\n", outstr)
-			}
+				if *verbose {
+					fmt.Printf("Sending UDP: <%s>\n", outstr)
+				}
 			*/
 			_, err := TxConn.Write([]byte(outstr))
 			if err != nil {
