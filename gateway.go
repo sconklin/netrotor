@@ -4,6 +4,8 @@ import (
 	"./config"
 	"flag"
 	"fmt"
+	"github.com/sconklin/go-i2c"
+	"log"
 	"net"
 	"os"
 	"path/filepath"
@@ -55,6 +57,52 @@ func main() {
 	}
 
 	rotator := conf.Rotator
+	/*
+	     ....
+	     // Here goes code specific for sending and reading data
+	     // to and from device connected via I2C bus, like:
+	     _, err := i2c.Write([]byte{0x1, 0xF3})
+	   	if err != nil { log.Fatal(err) }
+	*/
+
+	/* LCD Display Handler */
+	/*
+		go func() {
+			// Handle I2C comms for A/D Converter and LCD Display
+
+			// Create new connection to I2C bus on 2 line with address 0x27
+			// Adafruit LCD backpack is address 0x00 by default
+			lcd, err := i2c.NewI2C(0x27, 2)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer lcd.Close()
+
+		}()
+	*/
+
+	/* A/D Handler */
+	go func() {
+		// ADS1115 is address 0x48 be default
+		adc, err := i2c.NewI2C(0x48, 2)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer adc.Close()
+
+		for {
+			/* read analog */
+			select {
+			case <-errc:
+				return
+			case <-quit:
+				return
+			case <-time.After(1 * time.Second): // TODO Make this faster
+				/* read the A/d */
+			}
+		}
+
+	}()
 
 	if *verbose {
 		fmt.Printf("Starting reads for rotator %s\n", rotator.Name)
