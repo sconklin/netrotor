@@ -1,4 +1,10 @@
-This is a gateway between hamlib's rotctl rotor control libraries, and the network interfaces used by the N1MM ham radio logger.
+This started as a gateway between hamlib's rotctl rotor control libraries, and the network interfaces used by the N1MM ham radio logger.
+
+It's in progress of being converted to be a complete rotor controller, which will use the existing circuitry in a HyGain controller to directly control the rotor.
+
+It's very much a work in progress.
+
+# === Documentation below here is obsolete ===
 
 To make it start as a service, copy rotor-n1mm.service to /etc/systemd/system, then edit that script to point to the gateway executable.
 
