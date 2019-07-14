@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"rotor-network/config"
+	"rotor-network/internal/config"
 	"strconv"
 	"strings"
 	"time"

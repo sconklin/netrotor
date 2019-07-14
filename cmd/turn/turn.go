@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"rotor-network/config"
+	"rotor-network/internal/config"
 )
 
 func main() {
