@@ -13,6 +13,7 @@ import (
 	"os"
 )
 
+// Represent the config items required for a single rotator
 type Rotator struct {
 	Name      string `json:"name"`
 	Port      string `json:"port"`
@@ -20,17 +21,20 @@ type Rotator struct {
 	Model     string `json:"model"`
 }
 
+// Represent the network-associated configuration items
 type Net struct {
 	RotorRx  string `json:"rotorrx"`
 	RotorTx  string `json:"rotortx"`
 	StatusRx string `json:"statusrx"`
 }
 
+// Represent the top-level config structure
 type Config struct {
 	Rotators []Rotator `json:"Rotators"`
 	Network  Net       `json:"Network"`
 }
 
+// Read the config json file
 func ReadConfig(jsonFileName string) (*Config, error) {
 	file, err := os.Open(jsonFileName)
 
@@ -50,6 +54,7 @@ func ReadConfig(jsonFileName string) (*Config, error) {
 	return &config, nil
 }
 
+// Print the config information
 func DumpConfig(conf *Config) {
 	fmt.Printf("Rotators:\n")
 	for _, rotator := range conf.Rotators {

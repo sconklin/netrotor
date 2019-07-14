@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+// Info about the rotator
 type Rinfo struct {
 	Azimuth float64
 	Name    string
@@ -62,9 +63,9 @@ func main() {
 		go func(rotator config.Rotator) {
 			/* Read rotor positions and send commands using serial port */
 			tLast := time.Now()
-			var posLast float64 = 0.0
-			var deltap float64 = 0.0
-			var azI float64 = 0.0
+			var posLast float64
+			var deltap float64
+			var azI float64
 
 			for {
 				cmdargs := fmt.Sprintf("/usr/bin/rotctl -m %s -r %s -s %s get_pos", rotator.Model, rotator.Port, rotator.PortSpeed)
@@ -133,7 +134,7 @@ func main() {
 		}
 		defer RxConn.Close()
 		buf := make([]byte, 1024)
-		var azI float64 = 0.0
+		var azI float64
 		for {
 			_, _, err := RxConn.ReadFromUDP(buf)
 			if err != nil {
