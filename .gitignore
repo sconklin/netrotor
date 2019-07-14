@@ -1,0 +1,4 @@
+*~
+cmd/gateway/gateway
+cmd/turn/turn
+.travis.yml.save
