@@ -9,7 +9,7 @@ RestartSec=1
 StartLimitBurst=5
 StartLimitIntervalSec=10
 User=pi
-ExecStart=/home/go/rotor-n1mm/gateway
+ExecStart=/home/go/src/rotor-network/gateway/gateway
 
 [Install]
 WantedBy=default.target

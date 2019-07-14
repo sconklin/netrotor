@@ -1,13 +1,13 @@
 package main
 
 import (
-	"./config"
 	"flag"
 	"fmt"
 	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"rotor-network/config"
 	"strconv"
 	"strings"
 	"time"
@@ -35,14 +35,14 @@ func main() {
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-	   fmt.Println("Error: ", err)
-	   os.Exit(1)
+		fmt.Println("Error: ", err)
+		os.Exit(1)
 	}
 
-    	configpath := filepath.Join(dir, "rotorconf.json")
+	configpath := filepath.Join(dir, "rotorconf.json")
 	if err != nil {
-	   fmt.Println("Error: ", err)
-	   os.Exit(1)
+		fmt.Println("Error: ", err)
+		os.Exit(1)
 	}
 
 	conf, err := config.ReadConfig(configpath)
@@ -160,9 +160,9 @@ func main() {
 				azI, _ = strconv.ParseFloat(azi, 64)
 				cmdpos <- Rinfo{azI, rotor}
 			} else {
-			  if *verbose {
-			     fmt.Println("Odd Pkt Received ", instr)
-			  }
+				if *verbose {
+					fmt.Println("Odd Pkt Received ", instr)
+				}
 			}
 			select {
 			case <-errc:
@@ -205,9 +205,9 @@ func main() {
 			/* Send the UDP packet with rotator position */
 			outstr := fmt.Sprintf("%s @ %d", p.Name, int(p.Azimuth*10))
 			/*
-			if *verbose {
-				fmt.Printf("Sending UDP: <%s>\n", outstr)
-			}
+				if *verbose {
+					fmt.Printf("Sending UDP: <%s>\n", outstr)
+				}
 			*/
 			_, err := TxConn.Write([]byte(outstr))
 			if err != nil {

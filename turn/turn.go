@@ -1,12 +1,12 @@
 package main
 
 import (
-	"./config"
 	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
+	"rotor-network/config"
 )
 
 func main() {
