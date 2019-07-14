@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/sconklin/rotor-network/internal/config"
 	"log"
 	"net"
 	"os"
-	"rotor-network/internal/config"
 )
 
 func main() {

@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/sconklin/rotor-network/internal/config"
 	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"rotor-network/internal/config"
 	"strconv"
 	"strings"
 	"time"
