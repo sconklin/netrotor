@@ -1,4 +1,10 @@
-This is a gateway between hamlib's rotctl rotor control libraries, and the network interfaces used by the N1MM ham radio logger.
+Gateway between hamlib's rotctl rotor control libraries, and the network interfaces used by the N1MM ham radio logger.
+=============================================================================================
+
+[![Build Status](https://travis-ci.org/sconklin/rotor-network.svg?branch=master)](https://travis-ci.org/sconklin/rotor-network)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sconklin/rotor-network)](https://goreportcard.com/report/github.com/sconklin/rotor-network)
+[![GoDoc](https://godoc.org/github.com/sconklin/rotor-network?status.svg)](https://godoc.org/github.com/sconklin/rotor-network)
+[![MIT License](http://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 To make it start as a service, copy rotor-n1mm.service to /etc/systemd/system, then edit that script to point to the gateway executable.
 
