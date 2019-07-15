@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// Info about the rotator
+// Rinfo contains Info about the rotator
 type Rinfo struct {
 	Azimuth float64
 	Name    string
