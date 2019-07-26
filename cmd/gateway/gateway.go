@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	//	"strconv"
 	"strings"
-	//	"time"
+	"time"
 
 	"github.com/sconklin/rotor-network/internal/config"
 )
@@ -76,4 +76,13 @@ func main() {
 
 	// Start motion control handler to move the rotator
 
+	// Test Code for LCD
+	lcdc <- LcdMsg{LcdMsgAz, "123.4"}
+	lcdc <- LcdMsg{LcdMsgSp, "987.6"}
+	lcdc <- LcdMsg{LcdMsgSrc, "Net"}
+	lcdc <- LcdMsg{LcdMsgInf, "BXR1"}
+	lcdc <- LcdMsg{LcdMsgMsg, "This is a test"}
+	time.Sleep(5 * time.Second)
+	quitc <- true
+	time.Sleep(1 * time.Second)
 }
