@@ -14,7 +14,7 @@ import (
 )
 
 // Rotator Represents the config items required for a single rotator
-type Rotator struct {
+type Rot struct {
 	Name      string `json:"name"`
 	Port      string `json:"port"`
 	PortSpeed string `json:"port_speed"`
@@ -30,8 +30,8 @@ type Net struct {
 
 // Config Represents the top-level config structure
 type Config struct {
-	Rotators []Rotator `json:"Rotators"`
-	Network  Net       `json:"Network"`
+	Rotator Rot `json:"Rotator"`
+	Network Net `json:"Network"`
 }
 
 // ReadConfig reads the config json file
@@ -56,13 +56,11 @@ func ReadConfig(jsonFileName string) (*Config, error) {
 
 // DumpConfig prints the config information
 func DumpConfig(conf *Config) {
-	fmt.Printf("Rotators:\n")
-	for _, rotator := range conf.Rotators {
-		fmt.Printf("    Name:  %s\n", rotator.Name)
-		fmt.Printf("    Model: %s\n", rotator.Model)
-		fmt.Printf("    Port:  %s\n", rotator.Port)
-		fmt.Printf("    Speed: %s\n", rotator.PortSpeed)
-	}
+	fmt.Printf("Rotator:\n")
+	fmt.Printf("    Name:  %s\n", conf.Rotator.Name)
+	fmt.Printf("    Model: %s\n", conf.Rotator.Model)
+	fmt.Printf("    Port:  %s\n", conf.Rotator.Port)
+	fmt.Printf("    Speed: %s\n", conf.Rotator.PortSpeed)
 	fmt.Printf("Network:\n")
 	fmt.Printf("    Rotor Rx:  %s\n", conf.Network.RotorRx)
 	fmt.Printf("    Rotor Tx:  %s\n", conf.Network.RotorTx)
