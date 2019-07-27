@@ -81,7 +81,7 @@ func main() {
 	lcdc <- LcdMsg{LcdMsgSp, "987.6"}
 	lcdc <- LcdMsg{LcdMsgSrc, "Net"}
 	lcdc <- LcdMsg{LcdMsgInf, "BXR1"}
-	lcdc <- LcdMsg{LcdMsgMsg, "This is a test"}
+	lcdc <- LcdMsg{LcdMsgMsg, "This is a very long test string"}
 	time.Sleep(5 * time.Second)
 	quitc <- true
 	time.Sleep(1 * time.Second)

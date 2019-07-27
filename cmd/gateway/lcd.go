@@ -16,6 +16,7 @@ import (
 3#                    #
  ######################
 */
+
 const (
 	LcdBanner  = "AI4QR RotorNet"
 	LcdBannerL = 0
@@ -59,6 +60,14 @@ type LcdMsg struct {
 	Text string
 }
 
+func truncateString(str string, num int) string {
+     retstr := str
+     if len(str) > num {
+	retstr = str[0:num]
+    }
+    return retstr
+}
+
 func LcdHandler(quitc <-chan bool, errc chan<- error, msgc <-chan LcdMsg) {
 
 	i2c, err := i2c.NewI2C(0x20, 1)
@@ -66,7 +75,7 @@ func LcdHandler(quitc <-chan bool, errc chan<- error, msgc <-chan LcdMsg) {
 		errc <- err
 	}
 	defer i2c.Close()
-	lcd, err := device.NewLcd(i2c, device.LCD16x2)
+	lcd, err := device.NewLcd(i2c, device.LCD20x4)
 	if err != nil {
 		errc <- err
 	}
@@ -94,22 +103,23 @@ func LcdHandler(quitc <-chan bool, errc chan<- error, msgc <-chan LcdMsg) {
 			case LcdMsgAz:
 				log.Debug("LcdHandler RX Az\n")
 				lcd.SetPosition(AzValL, AzValC)
-				fmt.Fprint(lcd, msg.Text[0:4])
+				fmt.Fprint(lcd, truncateString(msg.Text, 5))
 			case LcdMsgSp:
 				log.Debug("LcdHandler RX Sp\n")
 				lcd.SetPosition(SpValL, SpValC)
-				fmt.Fprint(lcd, msg.Text[0:4])
+				fmt.Fprint(lcd, truncateString(msg.Text, 5))
 			case LcdMsgSrc:
 				log.Debug("LcdHandler RX Src\n")
 				lcd.SetPosition(SrcValL, SrcValC)
-				fmt.Fprint(lcd, msg.Text[0:3])
+				fmt.Fprint(lcd, truncateString(msg.Text, 3))
 			case LcdMsgInf:
 				log.Debug("LcdHandler RX Inf\n")
 				lcd.SetPosition(InfValL, InfValC)
-				fmt.Fprint(lcd, msg.Text[0:5])
+				fmt.Fprint(lcd, truncateString(msg.Text, 5))
 			case LcdMsgMsg:
 				log.Debug("LcdHandler RX Msg\n")
 				lcd.SetPosition(MsgL, MsgC)
+				fmt.Fprint(lcd, truncateString(msg.Text, 20))
 			default:
 				errc <- errors.New("Invalid LCD Msg Type")
 			}
