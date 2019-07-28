@@ -68,7 +68,7 @@ func truncateString(str string, num int) string {
 	return retstr
 }
 
-func LcdHandler(quitc <-chan bool, errc chan<- error, msgc <-chan LcdMsg) {
+func LcdHandler(errc chan<- error, msgc <-chan LcdMsg) {
 
 	i2c, err := i2c.NewI2C(0x20, 1)
 	if err != nil {
@@ -94,9 +94,6 @@ func LcdHandler(quitc <-chan bool, errc chan<- error, msgc <-chan LcdMsg) {
 
 	for {
 		select {
-		case <-quitc:
-			log.Info("LcdHandler Quit\n")
-			return
 		case msg := <-msgc:
 			/* Display this message */
 			switch msg.Type {

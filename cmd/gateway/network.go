@@ -14,7 +14,7 @@ func N1MMInit() error {
 	return nil
 }
 
-func N1MMHandler(quitc <-chan bool, errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *config.Config) {
+func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *config.Config) {
 
 	var azI float64
 	var lastAz float64
@@ -89,9 +89,6 @@ func N1MMHandler(quitc <-chan bool, errc chan<- error, Azc <-chan Rinfo, Spc cha
 				log.Debug("Odd Pkt Received ", instr)
 			}
 			select {
-			case <-quitc:
-				log.Info("N1MMHandler RX Loop Quit\n")
-				return
 			default:
 			}
 		}
@@ -101,9 +98,6 @@ func N1MMHandler(quitc <-chan bool, errc chan<- error, Azc <-chan Rinfo, Spc cha
 	go func() {
 		for {
 			select {
-			case <-quitc:
-				log.Info("N1MMHandler TX Loop Quit\n")
-				return
 			case p := <-Azc:
 				// We got a position report
 				azI = p.Azimuth

@@ -38,7 +38,6 @@ func main() {
 
 	// Using this
 	// https://stackoverflow.com/questions/15715605/multiple-goroutines-listening-on-one-channel
-	quitc := make(chan bool)      // signals all threads to return
 	errc := make(chan error)      // for passing back errors to main event loop
 	lcdc := make(chan LcdMsg)     // Send messages to the LCD
 	azimuthc := make(chan Rinfo)  // used to receive position updates
@@ -67,10 +66,10 @@ func main() {
 	}
 
 	// Start LCD handler to display messages
-	go LcdHandler(quitc, errc, lcdc)
+	go LcdHandler(errc, lcdc)
 
 	// Start the UDP handler for N1MM protocol
-	go N1MMHandler(quitc, errc, azimuthc, setpointc, conf)
+	go N1MMHandler(errc, azimuthc, setpointc, conf)
 
 	// Start A/D handler to read position
 
@@ -83,6 +82,5 @@ func main() {
 	lcdc <- LcdMsg{LcdMsgInf, "BXR1"}
 	lcdc <- LcdMsg{LcdMsgMsg, "This is a very long test string"}
 	time.Sleep(5 * time.Second)
-	quitc <- true
 	time.Sleep(1 * time.Second)
 }
