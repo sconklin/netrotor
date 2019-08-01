@@ -88,7 +88,7 @@ func main() {
 		admutex.Lock()
 		lval := advalue
 		admutex.Unlock()
-		s := fmt.Sprintf("Val: %d\n", lval)
+		s := fmt.Sprintf("Val: %d     ", lval)
 		lcdc <- LcdMsg{LcdMsgMsg, s}
 	}
 }

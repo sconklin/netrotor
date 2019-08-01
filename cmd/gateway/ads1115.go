@@ -26,11 +26,11 @@ func AdsHandler(errc chan<- error) {
 	}
 	log.Debugf("  Configured for Single Ended Channel 0")
 
-	err = sensor.SetPgaMode(ads.PGA_0_256)
+	err = sensor.SetPgaMode(ads.PGA_4_096)
 	if err != nil {
 		errc <- err
 	}
-	log.Debugf("  Configured for +/- 128 mV Full Scale")
+	log.Debugf("  Configured for +/- 4.096 V Full Scale")
 
 	err = sensor.SetConversionMode(ads.MODE_CONTINUOUS)
 	if err != nil {
@@ -38,7 +38,7 @@ func AdsHandler(errc chan<- error) {
 	}
 	log.Debugf("  Configured for continuous sampling")
 
-	err = sensor.SetDataRate(ads.RATE_8)
+	err = sensor.SetDataRate(ads.RATE_16)
 	if err != nil {
 		errc <- err
 	}
