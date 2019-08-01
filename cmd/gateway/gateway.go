@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	logger "github.com/sconklin/go-logger"
 	"github.com/sconklin/rotor-network/internal/config"
 )
 
@@ -35,6 +36,8 @@ func extractTag(inp, tag string) string {
 func main() {
 	var verbose = flag.Bool("v", false, "Enable verbose output")
 	flag.Parse()
+
+	logger.ChangePackageLogLevel("lcdbackpack", logger.InfoLevel)
 
 	// Using this
 	// https://stackoverflow.com/questions/15715605/multiple-goroutines-listening-on-one-channel
