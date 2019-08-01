@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	//	"os/exec"
 	"path/filepath"
 	//	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	logger "github.com/sconklin/go-logger"
@@ -20,13 +20,9 @@ type Rinfo struct {
 	Name    string
 }
 
-/*
-func check(err error, errc <-chan error) {
-	if err != nil {
-		errc <- err
-	}
-}
-*/
+// Create needed mutexes and associated data
+var admutex = &sync.Mutex{}
+var advalue int16
 
 func extractTag(inp, tag string) string {
 	bar := strings.Split(strings.Split(inp, "</"+tag+">")[0], "<"+tag+">")
@@ -37,10 +33,13 @@ func main() {
 	var verbose = flag.Bool("v", false, "Enable verbose output")
 	flag.Parse()
 
+	logger.ChangePackageLogLevel("i2c", logger.InfoLevel)
+	logger.ChangePackageLogLevel("ads", logger.InfoLevel)
 	logger.ChangePackageLogLevel("lcdbackpack", logger.InfoLevel)
 
 	// Using this
 	// https://stackoverflow.com/questions/15715605/multiple-goroutines-listening-on-one-channel
+	// Create the channels we'll use
 	errc := make(chan error)      // for passing back errors to main event loop
 	lcdc := make(chan LcdMsg)     // Send messages to the LCD
 	azimuthc := make(chan Rinfo)  // used to receive position updates
@@ -75,6 +74,7 @@ func main() {
 	go N1MMHandler(errc, azimuthc, setpointc, conf)
 
 	// Start A/D handler to read position
+	go AdsHandler(errc)
 
 	// Start motion control handler to move the rotator
 
@@ -83,7 +83,12 @@ func main() {
 	lcdc <- LcdMsg{LcdMsgSp, "987.6"}
 	lcdc <- LcdMsg{LcdMsgSrc, "Net"}
 	lcdc <- LcdMsg{LcdMsgInf, "BXR1"}
-	lcdc <- LcdMsg{LcdMsgMsg, "This is a very long test string"}
-	time.Sleep(5 * time.Second)
-	time.Sleep(1 * time.Second)
+	for {
+		time.Sleep(1 * time.Second)
+		admutex.Lock()
+		lval := advalue
+		admutex.Unlock()
+		s := fmt.Sprintf("Val: %d\n", lval)
+		lcdc <- LcdMsg{LcdMsgMsg, s}
+	}
 }

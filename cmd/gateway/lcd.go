@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+
 	i2c "github.com/sconklin/go-i2c"
 	device "github.com/sconklin/go-lcd-backpack"
 )
@@ -79,6 +80,7 @@ func LcdHandler(errc chan<- error, msgc <-chan LcdMsg) {
 	if err != nil {
 		errc <- err
 	}
+
 	lcd.BacklightOn()
 	lcd.Clear()
 	lcd.SetPosition(LcdBannerL, LcdBannerC)
