@@ -1,6 +1,7 @@
 package main
 
 import (
+        "math"
 	"time"
 
 	"github.com/sconklin/go-ads1115"
@@ -11,10 +12,10 @@ import (
 // This is done now using a linear fit from meeasuring
 // the rotor, but should probably be replaced with
 // interpolation using values gathered during a cal routine.
-func AdToAz(int16 adval) float64 {
-	rawAz := (adfl * .0017) + 1.33
+func AdToAz(adval int16) float64 {
+	rawAz := float64(adval - 100) / 79.87
 	// Raw azimuth is 0 = south
-	return Mod((rawAz + 180), 360)
+	return math.Mod((rawAz + 180), 360)
 }
 
 func AdsHandler(errc chan<- error) {
@@ -100,6 +101,6 @@ func AdsHandler(errc chan<- error) {
 		admutex.Lock()
 		azvalue = adfl
 		admutex.Unlock()
-		log.Infof("A/D value: 0x03.3%f", azvalue)
+		log.Debugf("Azimuth value: %05d  , %03.3f", val, azvalue)
 	}
 }
