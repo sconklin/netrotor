@@ -113,7 +113,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 				deltap = deltap * -1
 			}
 			// Send position every 15 seconds or when it changes
-			if (deltap > 1) || (time.Now().Sub(timeLast) > (15 * time.Second)) {
+			if (deltap > 2) || (time.Now().Sub(timeLast) > (15 * time.Second)) {
 				lastAz = azI
 				timeLast = time.Now()
 				outstr := fmt.Sprintf("%s @ %d", conf.Rotator.Name, int(azI*10))
