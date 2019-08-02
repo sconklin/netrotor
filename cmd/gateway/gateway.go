@@ -18,6 +18,7 @@ import (
 type Rinfo struct {
 	Azimuth float64
 	Name    string
+	Source  string
 }
 
 // Create needed mutexes and associated data
@@ -36,6 +37,7 @@ func main() {
 	logger.ChangePackageLogLevel("i2c", logger.InfoLevel)
 	logger.ChangePackageLogLevel("ads", logger.InfoLevel)
 	logger.ChangePackageLogLevel("lcdbackpack", logger.InfoLevel)
+	logger.ChangePackageLogLevel("relay", logger.InfoLevel)
 
 	// Using this
 	// https://stackoverflow.com/questions/15715605/multiple-goroutines-listening-on-one-channel
@@ -77,9 +79,10 @@ func main() {
 	go AdsHandler(errc)
 
 	// Start motion control handler to move the rotator
+	go MotionHandler(errc, setpointc, lcdc)
 
 	// Test Code for LCD
-	lcdc <- LcdMsg{LcdMsgSp, "987.6"}
+	//lcdc <- LcdMsg{LcdMsgSp, "987.6"}
 	lcdc <- LcdMsg{LcdMsgSrc, "Net"}
 	lcdc <- LcdMsg{LcdMsgInf, "BXR1"}
 
@@ -98,7 +101,7 @@ func main() {
 			lcdc <- LcdMsg{LcdMsgAz, fmt.Sprintf("%03.1f", laz)}
 
 			// Send Azimuth to the N1MM UDP handler
-			azimuthc <- Rinfo{laz, ""}
+			azimuthc <- Rinfo{laz, "", ""}
 		}
 	}
 }
