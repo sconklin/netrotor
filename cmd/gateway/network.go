@@ -24,6 +24,10 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 
 	timeLast := time.Now()
 
+	if len(conf.Rotator.Name) == 0 {
+		errc <- errors.New("Missing rotor name from config")
+	}
+
 	// UDP RX setup for rotor commands
 	rxport := ":" + conf.Network.RotorRx
 	RxAddr, err := net.ResolveUDPAddr("udp", rxport)
@@ -110,7 +114,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 				lastAz = azI
 				timeLast = time.Now()
 				outstr := fmt.Sprintf("%s @ %d", conf.Rotator.Name, int(azI*10))
-				log.Info("Sending UDP: <%s>\n", outstr)
+				log.Infof("Sending UDP: <%s>\n", outstr)
 				_, err := TxConn.Write([]byte(outstr))
 				if err != nil {
 					errc <- err
