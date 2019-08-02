@@ -22,7 +22,7 @@ type Rinfo struct {
 
 // Create needed mutexes and associated data
 var admutex = &sync.Mutex{}
-var advalue int16
+var azvalue float64
 
 func extractTag(inp, tag string) string {
 	bar := strings.Split(strings.Split(inp, "</"+tag+">")[0], "<"+tag+">")
@@ -86,9 +86,9 @@ func main() {
 	for {
 		time.Sleep(1 * time.Second)
 		admutex.Lock()
-		lval := advalue
+		lval := azvalue
 		admutex.Unlock()
-		s := fmt.Sprintf("Val: %d     ", lval)
+		s := fmt.Sprintf("Val: %03.1f     ", lval)
 		lcdc <- LcdMsg{LcdMsgMsg, s}
 	}
 }

@@ -7,6 +7,16 @@ import (
 	"github.com/sconklin/go-i2c"
 )
 
+// AdToAz converts the A/D voltage reading to azimuth
+// This is done now using a linear fit from meeasuring
+// the rotor, but should probably be replaced with
+// interpolation using values gathered during a cal routine.
+func AdToAz(int16 adval) float64 {
+	rawAz := (adfl * .0017) + 1.33
+	// Raw azimuth is 0 = south
+	return Mod((rawAz + 180), 360)
+}
+
 func AdsHandler(errc chan<- error) {
 	i2c, err := i2c.NewI2C(0x48, 1)
 	if err != nil {
@@ -86,9 +96,10 @@ func AdsHandler(errc chan<- error) {
 		if err != nil {
 			errc <- err
 		}
+		adfl := AdToAz(val)
 		admutex.Lock()
-		advalue = val
+		azvalue = adfl
 		admutex.Unlock()
-		log.Infof("A/D value: 0x%x", val)
+		log.Infof("A/D value: 0x03.3%f", azvalue)
 	}
 }
