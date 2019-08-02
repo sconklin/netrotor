@@ -33,6 +33,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 
 	RxConn, err := net.ListenUDP("udp", RxAddr)
 	if err != nil {
+		log.Infof("ListenUDP Error: %v\n", err)
 		errc <- err
 	}
 
@@ -63,7 +64,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 		for {
 			_, _, err := RxConn.ReadFromUDP(buf)
 			if err != nil {
-				log.Info("UDP RX Error\n")
+				log.Infof("UDP RX Error: %v\n", err)
 				errc <- err
 			}
 
@@ -94,29 +95,27 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 		}
 	}()
 
-	// Start a handler loop for transmit
-	go func() {
-		for {
-			select {
-			case p := <-Azc:
-				// We got a position report
-				azI = p.Azimuth
-				deltap = azI - lastAz
-				if deltap < 0 {
-					deltap = deltap * -1
-				}
-				// Send position every 15 seconds or when it changes
-				if (deltap > 1) || (time.Now().Sub(timeLast) > (15 * time.Second)) {
-					lastAz = azI
-					timeLast = time.Now()
-					outstr := fmt.Sprintf("%s @ %d", conf.Rotator.Name, int(azI*10))
-					log.Info("Sending UDP: <%s>\n", outstr)
-					_, err := TxConn.Write([]byte(outstr))
-					if err != nil {
-						errc <- err
-					}
+	//  Run a handler loop for transmit
+	for {
+		select {
+		case p := <-Azc:
+			// We got a position report, ignore the name
+			azI = p.Azimuth
+			deltap = azI - lastAz
+			if deltap < 0 {
+				deltap = deltap * -1
+			}
+			// Send position every 15 seconds or when it changes
+			if (deltap > 1) || (time.Now().Sub(timeLast) > (15 * time.Second)) {
+				lastAz = azI
+				timeLast = time.Now()
+				outstr := fmt.Sprintf("%s @ %d", conf.Rotator.Name, int(azI*10))
+				log.Info("Sending UDP: <%s>\n", outstr)
+				_, err := TxConn.Write([]byte(outstr))
+				if err != nil {
+					errc <- err
 				}
 			}
 		}
-	}()
+	}
 }

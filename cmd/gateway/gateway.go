@@ -79,16 +79,26 @@ func main() {
 	// Start motion control handler to move the rotator
 
 	// Test Code for LCD
-	lcdc <- LcdMsg{LcdMsgAz, "123.4"}
 	lcdc <- LcdMsg{LcdMsgSp, "987.6"}
 	lcdc <- LcdMsg{LcdMsgSrc, "Net"}
 	lcdc <- LcdMsg{LcdMsgInf, "BXR1"}
+
 	for {
-		time.Sleep(1 * time.Second)
-		admutex.Lock()
-		lval := azvalue
-		admutex.Unlock()
-		s := fmt.Sprintf("Val: %03.1f     ", lval)
-		lcdc <- LcdMsg{LcdMsgMsg, s}
+		select {
+		case myerr := <-errc:
+			// We got an error from somewhere
+			s := fmt.Sprintf("%v", err)
+			lcdc <- LcdMsg{LcdMsgMsg, s}
+			log.Fatal(myerr)
+		case <-time.After(500 * time.Millisecond):
+			// Update the LCD Display
+			admutex.Lock()
+			laz := azvalue
+			admutex.Unlock()
+			lcdc <- LcdMsg{LcdMsgAz, fmt.Sprintf("%03.1d", laz)}
+
+			// Send Azimuth to the N1MM UDP handler
+			azimuthc <- Rinfo{laz, ""}
+		}
 	}
 }
