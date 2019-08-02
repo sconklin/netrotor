@@ -38,7 +38,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 
 	RxConn, err := net.ListenUDP("udp", RxAddr)
 	if err != nil {
-		log.Infof("ListenUDP Error: %v\n", err)
+		log.Infof("ListenUDP Error: %v", err)
 		errc <- err
 	}
 
@@ -69,7 +69,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 		for {
 			_, _, err := RxConn.ReadFromUDP(buf)
 			if err != nil {
-				log.Infof("UDP RX Error: %v\n", err)
+				log.Infof("UDP RX Error: %v", err)
 				errc <- err
 			}
 
@@ -90,10 +90,12 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 				log.Debug("        Freqband: ", freq)
 
 				azI, _ = strconv.ParseFloat(azi, 64)
+				log.Infof("UDP RX: <%03.1f>", azI)
 				Spc <- Rinfo{azI, rotor}
 			} else {
 				log.Debug("Odd Pkt Received ", instr)
 			}
+
 			select {
 			default:
 			}
@@ -115,7 +117,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 				lastAz = azI
 				timeLast = time.Now()
 				outstr := fmt.Sprintf("%s @ %d", conf.Rotator.Name, int(azI*10))
-				log.Infof("Sending UDP: <%s>\n", outstr)
+				log.Infof("Sending UDP: <%s>", outstr)
 				_, err := TxConn.Write([]byte(outstr))
 				if err != nil {
 					errc <- err
