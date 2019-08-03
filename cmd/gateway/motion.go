@@ -8,18 +8,23 @@ import (
 	i2c "github.com/sconklin/go-i2c"
 )
 
+type ControlMode int
+
+const (
+	ModeManualControl = iota
+	ModeSwControl
+	ModeStuck
+)
+
 type ControlState int
 
 const (
-	MotionBraked = iota
-	MotionUnbraked
-	MotionMovingCw
-	MotionMovingCCW
-	MotionCoasting
-	MotionStuck
+	StateBraked = iota
+	StateUnbraked
+	StateMovingCw
+	StateMovingCCW
+	StateCoasting
 )
-
-type MotionState int
 
 const (
 	BrakeRelay = 1
@@ -31,7 +36,8 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 
 	var setpoint float64
 	var mlaz float64
-	var state MotionState
+	var state ControlState
+	var mode ControlMode
 
 	i2c, err := i2c.NewI2C(0x10, 1)
 	if err != nil {
@@ -51,6 +57,10 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 		}
 	}
 
+	// set initial state and mode
+	mode = ModeSwControl
+	state = StateBraked
+
 	for {
 		select {
 		case sp := <-setpointc:
@@ -68,19 +78,46 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 
 		// Now we start the motion control loop. We need to detect
 		// when there is motion now commanded by us (front panel control)
-		switch state {
-		case MotionBraked:
-			if mlaz > 0 {
-				log.Info("mlaz gt zero")
-
+		switch mode {
+		case ModeManualControl:
+			switch state {
+			case StateBraked:
+			case StateUnbraked:
+			case StateMovingCw:
+			case StateMovingCCW:
+			case StateCoasting:
+			default:
+				errstr := fmt.Sprintf("Unexpected state %d in motion control", state)
+				errc <- errors.New(errstr)
 			}
-		case MotionUnbraked:
-		case MotionMovingCw:
-		case MotionMovingCCW:
-		case MotionCoasting:
-		case MotionStuck:
+		case ModeSwControl:
+			switch state {
+			case StateBraked:
+			case StateUnbraked:
+			case StateMovingCw:
+			case StateMovingCCW:
+			case StateCoasting:
+			default:
+				errstr := fmt.Sprintf("Unexpected state %d in motion control", state)
+				errc <- errors.New(errstr)
+			}
+		case ModeStuck:
+			switch state {
+			case StateBraked:
+				if mlaz > 0 {
+					log.Info("mlaz gt zero")
+
+				}
+			case StateUnbraked:
+			case StateMovingCw:
+			case StateMovingCCW:
+			case StateCoasting:
+			default:
+				errstr := fmt.Sprintf("Unexpected state %d in motion control", state)
+				errc <- errors.New(errstr)
+			}
 		default:
-			errstr := fmt.Sprintf("Unexpected state %d in motion control", state)
+			errstr := fmt.Sprintf("Unexpected mode %d in motion control", mode)
 			errc <- errors.New(errstr)
 		}
 	}
