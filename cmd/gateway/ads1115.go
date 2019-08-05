@@ -102,6 +102,7 @@ func AdsHandler(errc chan<- error) {
 		}
 		vals[vi] = val
 	}
+	vi = 0
 	for {
 		time.Sleep(100 * time.Millisecond)
 		val, err := sensor.ReadConversion()
