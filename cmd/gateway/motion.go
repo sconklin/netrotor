@@ -8,6 +8,33 @@ import (
 	i2c "github.com/sconklin/go-i2c"
 )
 
+/*
+ * Modes: There are three modes.
+ *
+ *   ManualControl is entered when we detect that the user is moving the rotator using the original controller front panel switch(es).
+ *   The only way we can detect this is that the rotor is moving and it's not under our control/
+ *   ManualControl exits when the rotator has stopped moving for a period of time
+ *
+ *   SwControl is the 'normal' mode, where motion control is under sogtware control. The desired azimuth (setpoint) could come from
+ *   several sources, including receipt of an N1MM UDP packet.
+ *
+ *   Stuck is entered when we have commanded the rotator to move but the azimuth does not change. This could be due to a stuck brake
+ *   or ice on the rotor. An attempt is made to unstick the rotator.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
 type ControlMode int
 
 const (
