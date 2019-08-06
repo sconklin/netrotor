@@ -36,7 +36,7 @@ func main() {
 
 	logger.ChangePackageLogLevel("i2c", logger.InfoLevel)
 	logger.ChangePackageLogLevel("ads", logger.InfoLevel)
-	logger.ChangePackageLogLevel("lcdbackpack", logger.InfoLevel)
+	logger.ChangePackageLogLevel("lcd-backpack", logger.InfoLevel)
 	logger.ChangePackageLogLevel("relay", logger.InfoLevel)
 
 	// Using this

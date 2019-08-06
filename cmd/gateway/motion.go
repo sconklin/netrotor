@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	relay "github.com/sconklin/go-dockerpi-relay"
 	i2c "github.com/sconklin/go-i2c"
@@ -102,6 +103,8 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 		admutex.Lock()
 		mlaz = azvalue
 		admutex.Unlock()
+
+		time.Sleep(1 * time.Second)
 
 		// Now we start the motion control loop. We need to detect
 		// when there is motion now commanded by us (front panel control)
