@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	relay "github.com/sconklin/go-dockerpi-relay"
@@ -21,18 +22,6 @@ import (
  *
  *   Stuck is entered when we have commanded the rotator to move but the azimuth does not change. This could be due to a stuck brake
  *   or ice on the rotor. An attempt is made to unstick the rotator.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  *
  */
 
@@ -60,12 +49,73 @@ const (
 	CcwRelay   = 3
 )
 
+const DeadBand = 2.0
+
+const (
+	Clockwise = iota
+	CounterClockwise
+)
+
+func within(one, two, delta float64) bool {
+	if math.Abs(one-two) <= math.Abs(delta) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func clampAz(az float64) float64 {
+
+	if az > 180.0 {
+		az = az - 360.0
+	}
+	if az > 180.0 {
+		return 180.0
+	}
+	if az < -180.0 {
+		return -180.0
+	}
+	return az
+}
+
+func infoString(mode ControlMode, state ControlState) string {
+	var retstr string
+	switch mode {
+	case ModeManualControl:
+		retstr = "M"
+	case ModeSwControl:
+		retstr = " "
+	case ModeStuck:
+		retstr = "S"
+	}
+
+	switch state {
+	case StateBraked:
+		retstr += "B"
+	case StateUnbraked:
+		retstr += "U"
+	case StateMovingCw:
+		retstr += ">"
+	case StateMovingCCW:
+		retstr += "<"
+	case StateCoasting:
+		retstr += "C"
+	}
+	retstr += "  "
+	return retstr
+}
+
 func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg) {
 
+	// In this module, setpoint and azimuth are kept as a range from -180 to 180 degrees
+	// This is because this is the actual motion range of the rotator
 	var setpoint float64
-	var mlaz float64
+	var azimuth float64
 	var state ControlState
 	var mode ControlMode
+	var coastStartTime = time.Now()
+	var spReceived bool = false
+	var updateInfo = false
 
 	i2c, err := i2c.NewI2C(0x10, 1)
 	if err != nil {
@@ -93,62 +143,89 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 		select {
 		case sp := <-setpointc:
 			/* we received a new setpoint */
-			setpoint = sp.Azimuth
-			lcdc <- LcdMsg{LcdMsgSp, fmt.Sprintf("%03.1f", setpoint)}
+			spReceived = true
+			setpoint = clampAz(sp.Azimuth)
+			lcdc <- LcdMsg{LcdMsgSp, fmt.Sprintf("%03.1f", sp.Azimuth)}
 			lcdc <- LcdMsg{LcdMsgSrc, sp.Source}
-
+		case <-time.After(100 * time.Millisecond):
+			break
 		default:
+			break
 		}
 
 		admutex.Lock()
-		mlaz = azvalue
+		azimuth = azvalue
 		admutex.Unlock()
+		azimuth = clampAz(azimuth)
 
-		time.Sleep(1 * time.Second)
-
-		// Now we start the motion control loop. We need to detect
-		// when there is motion now commanded by us (front panel control)
+		// Now we start the motion control logic.
 		switch mode {
 		case ModeManualControl:
-			switch state {
-			case StateBraked:
-			case StateUnbraked:
-			case StateMovingCw:
-			case StateMovingCCW:
-			case StateCoasting:
-			default:
-				errstr := fmt.Sprintf("Unexpected state %d in motion control", state)
-				errc <- errors.New(errstr)
-			}
+			errstr := fmt.Sprintf("Unexpected unimplemented manual mode in motion control")
+			errc <- errors.New(errstr)
 		case ModeSwControl:
+			if !spReceived {
+				break
+			}
 			switch state {
 			case StateBraked:
+				// See if we need to move
+				if within(setpoint, azimuth, DeadBand) {
+					break // nothing to do
+				} else {
+					// unbrake and prepare to turn
+					rly.Off(BrakeRelay)
+					state = StateUnbraked
+					updateInfo = true
+				}
 			case StateUnbraked:
+				if setpoint >= azimuth {
+					// Turn Clockwise
+					state = StateMovingCw
+					rly.On(CwRelay)
+					updateInfo = true
+				} else {
+					// Turn CCW
+					state = StateMovingCCW
+					rly.On(CcwRelay)
+					updateInfo = true
+				}
 			case StateMovingCw:
+				if (setpoint < azimuth) || within(setpoint, azimuth, DeadBand) {
+					rly.Off(CwRelay)
+					state = StateCoasting
+					coastStartTime = time.Now()
+					updateInfo = true
+				}
 			case StateMovingCCW:
+				if (setpoint > azimuth) || within(setpoint, azimuth, DeadBand) {
+					rly.Off(CcwRelay)
+					state = StateCoasting
+					coastStartTime = time.Now()
+					updateInfo = true
+				}
 			case StateCoasting:
+				tdelta := time.Now().Sub(coastStartTime)
+				if tdelta > (2 * time.Second) {
+					rly.Off(BrakeRelay)
+				}
+				state = StateBraked
+				updateInfo = true
 			default:
 				errstr := fmt.Sprintf("Unexpected state %d in motion control", state)
 				errc <- errors.New(errstr)
 			}
 		case ModeStuck:
-			switch state {
-			case StateBraked:
-				if mlaz > 0 {
-					log.Info("mlaz gt zero")
-
-				}
-			case StateUnbraked:
-			case StateMovingCw:
-			case StateMovingCCW:
-			case StateCoasting:
-			default:
-				errstr := fmt.Sprintf("Unexpected state %d in motion control", state)
-				errc <- errors.New(errstr)
-			}
+			errstr := fmt.Sprintf("Unexpected unimplemented stuck mode in motion control")
+			errc <- errors.New(errstr)
 		default:
 			errstr := fmt.Sprintf("Unexpected mode %d in motion control", mode)
 			errc <- errors.New(errstr)
 		}
 	}
+
+	if updateInfo {
+		lcdc <- LcdMsg{LcdMsgInf, infoString(mode, state)}
+	}
+
 }

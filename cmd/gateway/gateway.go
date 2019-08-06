@@ -83,8 +83,8 @@ func main() {
 
 	// Test Code for LCD
 	//lcdc <- LcdMsg{LcdMsgSp, "987.6"}
-	lcdc <- LcdMsg{LcdMsgSrc, "Net"}
-	lcdc <- LcdMsg{LcdMsgInf, "BXR1"}
+	lcdc <- LcdMsg{LcdMsgSrc, "   "}
+	lcdc <- LcdMsg{LcdMsgInf, "    "}
 
 	for {
 		select {
