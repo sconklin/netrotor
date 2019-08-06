@@ -149,8 +149,6 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 			lcdc <- LcdMsg{LcdMsgSrc, sp.Source}
 		case <-time.After(100 * time.Millisecond):
 			break
-		default:
-			break
 		}
 
 		admutex.Lock()
@@ -174,7 +172,7 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 					break // nothing to do
 				} else {
 					// unbrake and prepare to turn
-					rly.Off(BrakeRelay)
+					rly.On(BrakeRelay) // relay on releases brake
 					state = StateUnbraked
 					updateInfo = true
 				}
@@ -209,6 +207,7 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 				if tdelta > (2 * time.Second) {
 					rly.Off(BrakeRelay)
 				}
+				rly.Off(BrakeRelay)
 				state = StateBraked
 				updateInfo = true
 			default:
