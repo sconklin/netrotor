@@ -209,6 +209,7 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 				}
 				rly.Off(BrakeRelay)
 				state = StateBraked
+				spReceived = false // TODO This is only for testing
 				updateInfo = true
 			default:
 				errstr := fmt.Sprintf("Unexpected state %d in motion control", state)
