@@ -11,14 +11,14 @@ import (
 )
 
 /*
- * Modes: There are three modes.
+ * Modes: There may eventually be three modes. Only SwControl is implemented.
+ *
+ *   SwControl is the 'normal' mode, where motion control is under sogtware control. The desired azimuth (setpoint) could come from
+ *   several sources, including receipt of an N1MM UDP packet.
  *
  *   ManualControl is entered when we detect that the user is moving the rotator using the original controller front panel switch(es).
  *   The only way we can detect this is that the rotor is moving and it's not under our control/
  *   ManualControl exits when the rotator has stopped moving for a period of time
- *
- *   SwControl is the 'normal' mode, where motion control is under sogtware control. The desired azimuth (setpoint) could come from
- *   several sources, including receipt of an N1MM UDP packet.
  *
  *   Stuck is entered when we have commanded the rotator to move but the azimuth does not change. This could be due to a stuck brake
  *   or ice on the rotor. An attempt is made to unstick the rotator.
@@ -50,6 +50,7 @@ const (
 )
 
 const DeadBand = 2.0
+const CoastBand = 5.0
 
 const (
 	Clockwise = iota
@@ -102,6 +103,7 @@ func infoString(mode ControlMode, state ControlState) string {
 		retstr += "C"
 	}
 	retstr += "  "
+	log.Infof("infoString: %s", retstr)
 	return retstr
 }
 
@@ -145,7 +147,9 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 			/* we received a new setpoint */
 			spReceived = true
 			setpoint = clampAz(sp.Azimuth)
-			lcdc <- LcdMsg{LcdMsgSp, fmt.Sprintf("%03.1f", sp.Azimuth)}
+			azstr := fmt.Sprintf("%03.1f", sp.Azimuth)
+			log.Infof("Motion sending az: %s", azstr)
+			lcdc <- LcdMsg{LcdMsgSp, azstr}
 			lcdc <- LcdMsg{LcdMsgSrc, sp.Source}
 		case <-time.After(100 * time.Millisecond):
 			break
@@ -189,14 +193,14 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 					updateInfo = true
 				}
 			case StateMovingCw:
-				if (setpoint < azimuth) || within(setpoint, azimuth, DeadBand) {
+				if (setpoint < azimuth) || within(setpoint, azimuth, CoastBand) {
 					rly.Off(CwRelay)
 					state = StateCoasting
 					coastStartTime = time.Now()
 					updateInfo = true
 				}
 			case StateMovingCCW:
-				if (setpoint > azimuth) || within(setpoint, azimuth, DeadBand) {
+				if (setpoint > azimuth) || within(setpoint, azimuth, CoastBand) {
 					rly.Off(CcwRelay)
 					state = StateCoasting
 					coastStartTime = time.Now()
@@ -226,6 +230,7 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 
 	if updateInfo {
 		lcdc <- LcdMsg{LcdMsgInf, infoString(mode, state)}
+		updateInfo = false
 	}
 
 }
