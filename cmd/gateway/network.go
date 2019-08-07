@@ -90,7 +90,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 				log.Debug("        Freqband: ", freq)
 
 				azI, _ = strconv.ParseFloat(azi, 64)
-				log.Infof("UDP RX: <%03.1f>", azI)
+				log.Infof("UDP RX: <%5.1f>", azI)
 				Spc <- Rinfo{azI, rotor, "UDP"}
 			} else {
 				log.Debug("Odd Pkt Received ", instr)
