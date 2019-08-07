@@ -50,7 +50,7 @@ const (
 )
 
 const DeadBand = 2.0
-const CoastBand = 5.0
+const CoastBand = 3.0
 
 const (
 	Clockwise = iota
@@ -147,9 +147,9 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 			/* we received a new setpoint */
 			spReceived = true
 			setpoint = clampAz(sp.Azimuth)
-			azstr := fmt.Sprintf("%03.1f", sp.Azimuth)
-			log.Infof("Motion sending az: %s", azstr)
-			lcdc <- LcdMsg{LcdMsgSp, azstr}
+			spstr := fmt.Sprintf("%03.1f", sp.Azimuth)
+			log.Infof("Motion sending az: %s", spstr)
+			lcdc <- LcdMsg{LcdMsgSp, spstr}
 			lcdc <- LcdMsg{LcdMsgSrc, sp.Source}
 		case <-time.After(100 * time.Millisecond):
 			break

@@ -98,7 +98,7 @@ func main() {
 			admutex.Lock()
 			laz := azvalue
 			admutex.Unlock()
-			lcdc <- LcdMsg{LcdMsgAz, fmt.Sprintf("%03.1f", laz)}
+			lcdc <- LcdMsg{LcdMsgAz, fmt.Sprintf("%5.1f", laz)}
 
 			// Send Azimuth to the N1MM UDP handler
 			azimuthc <- Rinfo{laz, "", ""}
