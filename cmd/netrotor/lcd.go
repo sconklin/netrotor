@@ -19,7 +19,7 @@ import (
 */
 
 const (
-	LcdBanner  = "AI4QR RotorNet"
+	LcdBanner  = "AI4QR NetRotor"
 	LcdBannerL = 0
 	LcdBannerC = 3
 	AzLabel    = "AZ:"

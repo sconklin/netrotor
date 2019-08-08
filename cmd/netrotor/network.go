@@ -90,8 +90,8 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 				log.Debug("        Freqband: ", freq)
 
 				azI, _ = strconv.ParseFloat(azi, 64)
-				log.Infof("UDP RX: <%03.1f>", azI)
-				Spc <- Rinfo{azI, rotor}
+				log.Infof("UDP RX: <%5.1f>", azI)
+				Spc <- Rinfo{azI, rotor, "UDP"}
 			} else {
 				log.Debug("Odd Pkt Received ", instr)
 			}
@@ -113,7 +113,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 				deltap = deltap * -1
 			}
 			// Send position every 15 seconds or when it changes
-			if (deltap > 1) || (time.Now().Sub(timeLast) > (15 * time.Second)) {
+			if (deltap > 2) || (time.Now().Sub(timeLast) > (15 * time.Second)) {
 				lastAz = azI
 				timeLast = time.Now()
 				outstr := fmt.Sprintf("%s @ %d", conf.Rotator.Name, int(azI*10))

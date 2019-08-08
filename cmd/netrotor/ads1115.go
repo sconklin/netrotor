@@ -1,24 +1,31 @@
 package main
 
 import (
-        "math"
+	"math"
 	"time"
 
 	"github.com/sconklin/go-ads1115"
 	"github.com/sconklin/go-i2c"
 )
 
+// TODO
 // AdToAz converts the A/D voltage reading to azimuth
 // This is done now using a linear fit from meeasuring
 // the rotor, but should probably be replaced with
 // interpolation using values gathered during a cal routine.
+// Should be in config file
 func AdToAz(adval int16) float64 {
-	rawAz := float64(adval - 100) / 79.87
+	rawAz := float64(adval-314) / 81.6
 	// Raw azimuth is 0 = south
+	if rawAz <= 0 {
+		rawAz = 0.1
+	} else if rawAz >= 360 {
+		rawAz = 359.9
+	}
 	return math.Mod((rawAz + 180), 360)
 }
 
-func AdsHandler(errc chan<- error) {
+func AdsHandler(errc chan<- error, lcdc chan<- LcdMsg) {
 	i2c, err := i2c.NewI2C(0x48, 1)
 	if err != nil {
 		errc <- err
@@ -91,12 +98,38 @@ func AdsHandler(errc chan<- error) {
 	}
 	log.Debugf("This A/D has final config: 0x%x", config)
 
+	const loopcount = 10
+	var vals [loopcount]int16
+	var vi uint16
+	// populate array
+	for vi = 0; vi < loopcount; vi++ {
+		val, err := sensor.ReadConversion()
+		if err != nil {
+			errc <- err
+		}
+		vals[vi] = val
+	}
+	vi = 0
 	for {
 		time.Sleep(100 * time.Millisecond)
 		val, err := sensor.ReadConversion()
 		if err != nil {
 			errc <- err
 		}
+		vals[vi] = val
+		vi = vi + 1
+		if vi >= loopcount {
+			vi = 0
+		}
+
+		// average the readings
+		var sum int32
+		for i := 0; i < loopcount; i++ {
+			sum = sum + int32(vals[i])
+		}
+		sum = sum / loopcount
+		val = int16(sum)
+
 		adfl := AdToAz(val)
 		admutex.Lock()
 		azvalue = adfl

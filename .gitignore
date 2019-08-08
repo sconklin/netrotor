@@ -1,4 +1,4 @@
 *~
-cmd/gateway/gateway
+cmd/netrotor/netrotor
 cmd/turn/turn
 .travis.yml.save
