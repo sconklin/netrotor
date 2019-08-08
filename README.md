@@ -1,9 +1,9 @@
-Gateway between hamlib's rotctl rotor control libraries, and the network interfaces used by the N1MM ham radio logger.
+A networked rotor controller, which accepts the network interfaces used by the N1MM ham radio logger.
 =============================================================================================
 
-[![Build Status](https://travis-ci.org/sconklin/rotor-network.svg?branch=master)](https://travis-ci.org/sconklin/rotor-network)
-[![Go Report Card](https://goreportcard.com/badge/github.com/sconklin/rotor-network)](https://goreportcard.com/report/github.com/sconklin/rotor-network)
-[![GoDoc](https://godoc.org/github.com/sconklin/rotor-network?status.svg)](https://godoc.org/github.com/sconklin/rotor-network)
+[![Build Status](https://travis-ci.org/sconklin/netrotor.svg?branch=master)](https://travis-ci.org/sconklin/netrotor)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sconklin/netrotor)](https://goreportcard.com/report/github.com/sconklin/netrotor)
+[![GoDoc](https://godoc.org/github.com/sconklin/netrotor?status.svg)](https://godoc.org/github.com/sconklin/netrotor)
 [![MIT License](http://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 To make it start as a service, copy netrotor.service to /etc/systemd/system, then edit that script to point to the gateway executable.
