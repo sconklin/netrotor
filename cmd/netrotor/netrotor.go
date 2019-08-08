@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	//	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	logger "github.com/sconklin/go-logger"
-	"github.com/sconklin/rotor-network/internal/config"
+	"github.com/sconklin/netrotor/internal/config"
 )
 
 // Rinfo contains Info about the rotator
@@ -25,10 +23,8 @@ type Rinfo struct {
 var admutex = &sync.Mutex{}
 var azvalue float64
 
-func extractTag(inp, tag string) string {
-	bar := strings.Split(strings.Split(inp, "</"+tag+">")[0], "<"+tag+">")
-	return bar[len(bar)-1]
-}
+// Global config structure accessible to all
+var conf *config.Config
 
 func main() {
 	var verbose = flag.Bool("v", false, "Enable verbose output")
@@ -59,7 +55,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	conf, err := config.ReadConfig(configpath)
+	conf, err = config.ReadConfig(configpath)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		os.Exit(1)

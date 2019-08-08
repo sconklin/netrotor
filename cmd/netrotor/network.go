@@ -8,8 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sconklin/rotor-network/internal/config"
+	"github.com/sconklin/netrotor/internal/config"
 )
+
+func extractTag(inp, tag string) string {
+	bar := strings.Split(strings.Split(inp, "</"+tag+">")[0], "<"+tag+">")
+	return bar[len(bar)-1]
+}
 
 func N1MMInit() error {
 	return nil
