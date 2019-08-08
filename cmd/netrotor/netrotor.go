@@ -9,6 +9,7 @@ import (
 	"time"
 
 	logger "github.com/sconklin/go-logger"
+	"github.com/sconklin/netrotor/internal/config"
 )
 
 // Rinfo contains Info about the rotator
@@ -23,7 +24,7 @@ var admutex = &sync.Mutex{}
 var azvalue float64
 
 // Global config structure accessible to all
-var conf *Config
+var conf *config.Config
 
 func main() {
 	var verbose = flag.Bool("v", false, "Enable verbose output")
@@ -54,14 +55,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	conf, err = ReadConfig(configpath)
+	conf, err = config.ReadConfig(configpath)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		os.Exit(1)
 	}
 
 	if *verbose {
-		DumpConfig(conf)
+		config.DumpConfig(conf)
 	}
 
 	// Start LCD handler to display messages
