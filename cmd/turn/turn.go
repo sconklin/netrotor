@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/sconklin/rotor-network/internal/config"
+	"github.com/sconklin/netrotor/internal/config"
 	"log"
 	"net"
 	"os"
