@@ -76,7 +76,7 @@ func main() {
 	go N1MMHandler(errc, azimuthc, setpointc, conf)
 
 	// Start A/D handler to read position
-	go AdsHandler(errc)
+	go AdsHandler(errc, lcdc)
 
 	// Start motion control handler to move the rotator
 	go MotionHandler(errc, setpointc, lcdc)

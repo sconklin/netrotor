@@ -50,7 +50,11 @@ const (
 )
 
 const DeadBand = 2.0
-const CoastBand = 3.0
+
+// Oddly, the amount of coast if different in each direction
+// were both 3.0
+const CwCoastBand = 7.9
+const CcwCoastBand = 4.6
 
 const (
 	Clockwise = iota
@@ -103,7 +107,6 @@ func infoString(mode ControlMode, state ControlState) string {
 		retstr += "C"
 	}
 	retstr += "  "
-	log.Infof("infoString: %s", retstr)
 	return retstr
 }
 
@@ -193,14 +196,14 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 					updateInfo = true
 				}
 			case StateMovingCw:
-				if (setpoint < azimuth) || within(setpoint, azimuth, CoastBand) {
+				if (setpoint < azimuth) || within(setpoint, azimuth, CwCoastBand) {
 					rly.Off(CwRelay)
 					state = StateCoasting
 					coastStartTime = time.Now()
 					updateInfo = true
 				}
 			case StateMovingCCW:
-				if (setpoint > azimuth) || within(setpoint, azimuth, CoastBand) {
+				if (setpoint > azimuth) || within(setpoint, azimuth, CcwCoastBand) {
 					rly.Off(CcwRelay)
 					state = StateCoasting
 					coastStartTime = time.Now()
@@ -226,11 +229,9 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 			errstr := fmt.Sprintf("Unexpected mode %d in motion control", mode)
 			errc <- errors.New(errstr)
 		}
+		if updateInfo {
+		   lcdc <- LcdMsg{LcdMsgInf, infoString(mode, state)}
+		   updateInfo = false
+		}
 	}
-
-	if updateInfo {
-		lcdc <- LcdMsg{LcdMsgInf, infoString(mode, state)}
-		updateInfo = false
-	}
-
 }
