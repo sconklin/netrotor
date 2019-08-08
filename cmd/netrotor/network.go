@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/sconklin/netrotor/internal/config"
 )
 
 func extractTag(inp, tag string) string {
@@ -20,7 +18,7 @@ func N1MMInit() error {
 	return nil
 }
 
-func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *config.Config) {
+func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *Config) {
 
 	var azI float64
 	var lastAz float64

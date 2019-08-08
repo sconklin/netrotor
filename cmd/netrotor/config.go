@@ -5,7 +5,7 @@
  * https://stackoverflow.com/questions/16465705/how-to-handle-configuration-in-go
  */
 
-package config
+package main
 
 import (
 	"encoding/json"
