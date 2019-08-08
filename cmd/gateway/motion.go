@@ -150,7 +150,7 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 			/* we received a new setpoint */
 			spReceived = true
 			setpoint = clampAz(sp.Azimuth)
-			spstr := fmt.Sprintf("%03.1f", sp.Azimuth)
+			spstr := fmt.Sprintf("%5.1f", sp.Azimuth)
 			log.Infof("Motion sending az: %s", spstr)
 			lcdc <- LcdMsg{LcdMsgSp, spstr}
 			lcdc <- LcdMsg{LcdMsgSrc, sp.Source}
