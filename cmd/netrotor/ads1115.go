@@ -8,7 +8,7 @@ import (
 	"github.com/sconklin/go-i2c"
 )
 
-// TODO 
+// TODO
 // AdToAz converts the A/D voltage reading to azimuth
 // This is done now using a linear fit from meeasuring
 // the rotor, but should probably be replaced with
@@ -18,9 +18,9 @@ func AdToAz(adval int16) float64 {
 	rawAz := float64(adval-314) / 81.6
 	// Raw azimuth is 0 = south
 	if rawAz <= 0 {
-	    rawAz = 0.1
+		rawAz = 0.1
 	} else if rawAz >= 360 {
-	    rawAz = 359.9
+		rawAz = 359.9
 	}
 	return math.Mod((rawAz + 180), 360)
 }

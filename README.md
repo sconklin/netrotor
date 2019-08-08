@@ -6,7 +6,7 @@ Gateway between hamlib's rotctl rotor control libraries, and the network interfa
 [![GoDoc](https://godoc.org/github.com/sconklin/rotor-network?status.svg)](https://godoc.org/github.com/sconklin/rotor-network)
 [![MIT License](http://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-To make it start as a service, copy rotor-n1mm.service to /etc/systemd/system, then edit that script to point to the gateway executable.
+To make it start as a service, copy netrotor.service to /etc/systemd/system, then edit that script to point to the gateway executable.
 
 Then run the following:
 

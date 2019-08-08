@@ -230,8 +230,8 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 			errc <- errors.New(errstr)
 		}
 		if updateInfo {
-		   lcdc <- LcdMsg{LcdMsgInf, infoString(mode, state)}
-		   updateInfo = false
+			lcdc <- LcdMsg{LcdMsgInf, infoString(mode, state)}
+			updateInfo = false
 		}
 	}
 }
