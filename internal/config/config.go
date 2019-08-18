@@ -28,10 +28,21 @@ type Net struct {
 	StatusRx string `json:"statusrx"`
 }
 
+// Mqtt Represents the MQTT items
+type Mqtt struct {
+	TopicSet   string `json:"topic_set"`
+	TopicRead  string `json:"topic_read"`
+	Broker     string `json:"broker"`
+	BrokerUser string `json:"broker_user"`
+	BrokerPass string `json:"broker_pass"`
+	BrokerPort string `json:"broker_port"`
+}
+
 // Config Represents the top-level config structure
 type Config struct {
-	Rotator Rot `json:"Rotator"`
-	Network Net `json:"Network"`
+	Rotator Rot  `json:"Rotator"`
+	Network Net  `json:"Network"`
+	MqttI   Mqtt `json:"Mqtt"`
 }
 
 // ReadConfig reads the config json file
@@ -65,4 +76,11 @@ func DumpConfig(conf *Config) {
 	fmt.Printf("    Rotor Rx:  %s\n", conf.Network.RotorRx)
 	fmt.Printf("    Rotor Tx:  %s\n", conf.Network.RotorTx)
 	fmt.Printf("    Status Rx: %s\n", conf.Network.StatusRx)
+	fmt.Printf("Mqtt:\n")
+	fmt.Printf("    Topic Set:   %s\n", conf.MqttI.TopicSet)
+	fmt.Printf("    Topic Read:  %s\n", conf.MqttI.TopicRead)
+	fmt.Printf("    Broker:      %s\n", conf.MqttI.Broker)
+	fmt.Printf("    User:        %s\n", conf.MqttI.BrokerUser)
+	fmt.Printf("    Pass:        %s\n", conf.MqttI.BrokerPass)
+	fmt.Printf("    Port:        %s\n", conf.MqttI.BrokerPort)
 }

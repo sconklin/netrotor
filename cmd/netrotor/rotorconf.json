@@ -10,5 +10,14 @@
 	    "rotorrx":  "12040",
 	    "rotortx":  "13010",
 	    "statusrx": "12060"
+	},
+    "Mqtt":
+        {
+	    "topic_set":    "AI4QR/Home/Ham/Rotator/Hexbeam/Set",
+	    "topic_read":   "AI4QR/Home/Ham/Rotator/Hexbeam/Azimuth",
+	    "broker":       "something.cloudmqtt.com",
+	    "broker_user": "auserstring",
+	    "broker_pass": "auserpassword",
+	    "broker_port": "17592"    
 	}
 }
