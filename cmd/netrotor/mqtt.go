@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
-	"time"
 
 	"github.com/sconklin/netrotor/internal/config"
 	"github.com/yosssi/gmq/mqtt"
@@ -74,7 +73,8 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo
 				// Define the processing of the message handler.
 				Handler: func(topicName, message []byte) {
 					// TODO make this use logging or remove it
-					fmt.Println(string(topicName), string(message))
+					// fmt.Println(string(topicName), string(message))
+					log.Infof("MQTT RX <%s><%s>", string(topicName), string(message))
 					var azimuth float64
 					azimuth, _ = strconv.ParseFloat(string(message), 64)
 					if azimuthValid(azimuth) {
@@ -95,6 +95,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo
 		case sp := <-mqttpubc:
 			/* Publish the azimuth */
 			textinfo := fmt.Sprintf("%5.1f", sp.Azimuth)
+			log.Infof(" MQTT Server: publishing %s", textinfo)
 			err = mqttClient.Publish(&client.PublishOptions{
 				QoS:       mqtt.QoS1,
 				TopicName: []byte(conf.MqttI.TopicRead),
@@ -103,8 +104,10 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo
 			if err != nil {
 				errc <- err
 			}
-		case <-time.After(100 * time.Millisecond):
-			break
+			/*
+				case <-time.After(100 * time.Millisecond):
+					break
+			*/
 		}
 
 	}
