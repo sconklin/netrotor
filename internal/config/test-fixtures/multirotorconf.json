@@ -1,5 +1,6 @@
 {
     "Rotator": {
+	    "serial_enable": "true",
 	    "name": "Rotor1",
 	    "port":"/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0",
 	    "port_speed":"4800",
@@ -7,12 +8,14 @@
 	},
     "Network":
         {
+	    "n1mm_enable": "true",
 	    "rotorrx":  "12040",
 	    "rotortx":  "13010",
 	    "statusrx": "12060"
 	},
     "Mqtt":
         {
+	    "mqtt_enable": "true",
 	    "topic_set":    "AI4QR/Home/Ham/Rotator/Hexbeam/Set",
 	    "topic_read":   "AI4QR/Home/Ham/Rotator/Hexbeam/Azimuth",
 	    "broker":       "something.cloudmqtt.com",

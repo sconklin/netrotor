@@ -15,21 +15,24 @@ import (
 
 // Rotator Represents the config items required for a single rotator
 type Rot struct {
-	Name      string `json:"name"`
-	Port      string `json:"port"`
-	PortSpeed string `json:"port_speed"`
-	Model     string `json:"model"`
+	SerialEnable string `json:"serial_enable"`
+	Name         string `json:"name"`
+	Port         string `json:"port"`
+	PortSpeed    string `json:"port_speed"`
+	Model        string `json:"model"`
 }
 
 // Net Represents the network-associated configuration items
 type Net struct {
-	RotorRx  string `json:"rotorrx"`
-	RotorTx  string `json:"rotortx"`
-	StatusRx string `json:"statusrx"`
+	N1mmEnable string `json:"n1mm_enable"`
+	RotorRx    string `json:"rotorrx"`  // N1MM RX port
+	RotorTx    string `json:"rotortx"`  // N1MM TX Port
+	StatusRx   string `json:"statusrx"` // N1MM Status Port
 }
 
 // Mqtt Represents the MQTT items
 type Mqtt struct {
+	MqttEnable string `json:"mqtt_enable"`
 	TopicSet   string `json:"topic_set"`
 	TopicRead  string `json:"topic_read"`
 	Broker     string `json:"broker"`
@@ -73,14 +76,16 @@ func DumpConfig(conf *Config) {
 	fmt.Printf("    Port:  %s\n", conf.Rotator.Port)
 	fmt.Printf("    Speed: %s\n", conf.Rotator.PortSpeed)
 	fmt.Printf("Network:\n")
-	fmt.Printf("    Rotor Rx:  %s\n", conf.Network.RotorRx)
-	fmt.Printf("    Rotor Tx:  %s\n", conf.Network.RotorTx)
-	fmt.Printf("    Status Rx: %s\n", conf.Network.StatusRx)
+	fmt.Printf("    N1MM Enable:  %s\n", conf.Network.N1mmEnable)
+	fmt.Printf("    Rotor Rx:     %s\n", conf.Network.RotorRx)
+	fmt.Printf("    Rotor Tx:     %s\n", conf.Network.RotorTx)
+	fmt.Printf("    Status Rx:    %s\n", conf.Network.StatusRx)
 	fmt.Printf("Mqtt:\n")
-	fmt.Printf("    Topic Set:   %s\n", conf.MqttI.TopicSet)
-	fmt.Printf("    Topic Read:  %s\n", conf.MqttI.TopicRead)
-	fmt.Printf("    Broker:      %s\n", conf.MqttI.Broker)
-	fmt.Printf("    User:        %s\n", conf.MqttI.BrokerUser)
-	fmt.Printf("    Pass:        %s\n", conf.MqttI.BrokerPass)
-	fmt.Printf("    Port:        %s\n", conf.MqttI.BrokerPort)
+	fmt.Printf("    MQTT Enable:  %s\n", conf.MqttI.MqttEnable)
+	fmt.Printf("    Topic Set:    %s\n", conf.MqttI.TopicSet)
+	fmt.Printf("    Topic Read:   %s\n", conf.MqttI.TopicRead)
+	fmt.Printf("    Broker:       %s\n", conf.MqttI.Broker)
+	fmt.Printf("    User:         %s\n", conf.MqttI.BrokerUser)
+	fmt.Printf("    Pass:         %s\n", conf.MqttI.BrokerPass)
+	fmt.Printf("    Port:         %s\n", conf.MqttI.BrokerPort)
 }

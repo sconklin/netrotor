@@ -151,7 +151,7 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 			spReceived = true
 			setpoint = clampAz(sp.Azimuth)
 			spstr := fmt.Sprintf("%5.1f", sp.Azimuth)
-			log.Infof("Motion sending az: %s", spstr)
+			log.Infof("Motion received setpoint: %s", spstr)
 			lcdc <- LcdMsg{LcdMsgSp, spstr}
 			lcdc <- LcdMsg{LcdMsgSrc, sp.Source}
 		case <-time.After(100 * time.Millisecond):
