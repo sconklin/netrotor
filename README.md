@@ -1,4 +1,4 @@
-A networked rotor controller, which accepts the network interfaces used by the N1MM ham radio logger.
+A networked rotor controller
 =============================================================================================
 
 [![Build Status](https://travis-ci.org/sconklin/netrotor.svg?branch=master)](https://travis-ci.org/sconklin/netrotor)
@@ -6,23 +6,16 @@ A networked rotor controller, which accepts the network interfaces used by the N
 [![GoDoc](https://godoc.org/github.com/sconklin/netrotor?status.svg)](https://godoc.org/github.com/sconklin/netrotor)
 [![MIT License](http://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
+This is an Azimuth-only rotator control system that runs on a raspberry pi and allows control of the rotor from the network.
+It accepts the N1MM logger rotor control packets, and allows control via MQTT.
+
+
 To make it start as a service, copy netrotor.service to /etc/systemd/system, then edit that script to point to the gateway executable.
 
 Then run the following:
 
 $ sudo systemctl daemon-reload
 $ sudo systemctl enable rotor-n1mm.service
-
-It's designed to be run on a host that's directly connected to the rotator.
-
-It will poll the rotator using rotctl, and broadcast the position using UDP packets compatible with N1MM.
-
-It will also listen for packets sent by N1MM commanding a movement, and pass those to the rotator using rotctl.
-
-On Ubuntu, UDP is blocked by default by Ubuntu Firewall (ufw). To open ports, do this:
-
-```sudo ufw allow 13010/udp
-```
 
 For N1MM, Port 12060 is used for status and 13010 is used for rotor updates
 
