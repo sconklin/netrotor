@@ -96,7 +96,11 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 
 				azI, _ = strconv.ParseFloat(azi, 64)
 				log.Infof("UDP RX: <%5.1f>", azI)
-				Spc <- Rinfo{azI, rotor, "UDP"}
+				Spc <- Rinfo{azI, rotor, "UDP", "Move"}
+			} else if strings.HasPrefix(instr, "<N1MMRotor><stop>") {
+				rotor := extractTag(instr, "rotor")
+				//freq := extractTag(instr, "freqband")
+				Spc <- Rinfo{0.0, rotor, "UDP", "Stop"}
 			} else {
 				log.Debug("Odd Pkt Received ", instr)
 			}

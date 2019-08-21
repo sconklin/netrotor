@@ -18,6 +18,7 @@ type Rinfo struct {
 	Azimuth float64
 	Name    string
 	Source  string
+	Command string
 }
 
 // Create needed mutexes and associated data
@@ -109,7 +110,7 @@ func main() {
 			lcdc <- LcdMsg{LcdMsgAz, fmt.Sprintf("%5.1f", laz)}
 
 			// Send Azimuth to the N1MM UDP handler
-			azimuthc <- Rinfo{laz, "", ""}
+			azimuthc <- Rinfo{laz, "", "", "Move"}
 		}
 	}
 }

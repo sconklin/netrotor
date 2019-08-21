@@ -41,6 +41,7 @@ const (
 	StateMovingCw
 	StateMovingCCW
 	StateCoasting
+	StateStopping
 )
 
 const (
@@ -95,6 +96,8 @@ func infoString(mode ControlMode, state ControlState) string {
 	}
 
 	switch state {
+	case StateStopping:
+		retstr += "S"
 	case StateBraked:
 		retstr += "B"
 	case StateUnbraked:
@@ -148,12 +151,20 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 		select {
 		case sp := <-setpointc:
 			/* we received a new setpoint */
-			spReceived = true
-			setpoint = clampAz(sp.Azimuth)
-			spstr := fmt.Sprintf("%5.1f", sp.Azimuth)
-			log.Infof("Motion received setpoint: %s", spstr)
-			lcdc <- LcdMsg{LcdMsgSp, spstr}
-			lcdc <- LcdMsg{LcdMsgSrc, sp.Source}
+			if sp.Name != conf.Rotator.Name {
+				log.Infof("Ignoring setpoint for rotor : %s", sp.Name)
+			} else if sp.Command == "Stop" {
+				state = StateStopping
+			} else if sp.Command == "Move" {
+				spReceived = true
+				setpoint = clampAz(sp.Azimuth)
+				spstr := fmt.Sprintf("%5.1f", sp.Azimuth)
+				log.Infof("Motion received setpoint: %s", spstr)
+				lcdc <- LcdMsg{LcdMsgSp, spstr}
+				lcdc <- LcdMsg{LcdMsgSrc, sp.Source}
+			} else {
+				errc <- errors.New("Invalid rotor command")
+			}
 		case <-time.After(100 * time.Millisecond):
 			break
 		}
@@ -173,6 +184,13 @@ func MotionHandler(errc chan<- error, setpointc <-chan Rinfo, lcdc chan<- LcdMsg
 				break
 			}
 			switch state {
+			case StateStopping:
+				setpoint = azimuth // make here the destination
+				rly.Off(CwRelay)   // shut everything down
+				rly.Off(CcwRelay)
+				state = StateCoasting
+				coastStartTime = time.Now()
+				updateInfo = true
 			case StateBraked:
 				// See if we need to move
 				if within(setpoint, azimuth, DeadBand) {

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/sconklin/netrotor/internal/config"
@@ -82,16 +83,19 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, conf *config.Config) 
 				QoS:         mqtt.QoS0,
 				// Define the processing of the message handler.
 				Handler: func(topicName, message []byte) {
-					// TODO make this use logging or remove it
-					// fmt.Println(string(topicName), string(message))
 					log.Infof("MQTT RX <%s><%s>", string(topicName), string(message))
-					var azimuth float64
-					azimuth, _ = strconv.ParseFloat(string(message), 64)
-					if azimuthValid(azimuth) {
+					if strings.ToUpper(string(message)) == "STOP" {
+						log.Info(" MQTT RX Stop")
+						mqttsetc <- Rinfo{0.0, "", "MQT", "Stop"}
 					} else {
-						log.Infof(" MQTT RX Bad Azimuth: <%5.1f>", azimuth)
+						var azimuth float64
+						azimuth, _ = strconv.ParseFloat(string(message), 64)
+						if azimuthValid(azimuth) {
+						} else {
+							log.Infof(" MQTT RX Bad Azimuth: <%5.1f>", azimuth)
+						}
+						mqttsetc <- Rinfo{azimuth, "", "MQT", "Move"}
 					}
-					mqttsetc <- Rinfo{azimuth, "", "MQT"}
 				},
 			},
 		},
