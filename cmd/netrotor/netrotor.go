@@ -43,11 +43,10 @@ func main() {
 	// Using this
 	// https://stackoverflow.com/questions/15715605/multiple-goroutines-listening-on-one-channel
 	// Create the channels we'll use
-	errc := make(chan error)         // for passing back errors to main event loop
-	lcdc := make(chan LcdMsg)        // Send messages to the LCD
-	azimuthc := make(chan Rinfo)     // used to receive position updates
-	setpointc := make(chan Rinfo)    // used to pass desired position to motion control
-	mqttpublishc := make(chan Rinfo) // used to publish the azimuth position
+	errc := make(chan error)      // for passing back errors to main event loop
+	lcdc := make(chan LcdMsg)     // Send messages to the LCD
+	azimuthc := make(chan Rinfo)  // used to receive position updates
+	setpointc := make(chan Rinfo) // used to pass desired position to motion control
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
@@ -84,7 +83,7 @@ func main() {
 
 	// Start the UDP handler for N1MM protocol
 	if parseBool(conf.MqttI.MqttEnable) {
-		go MqttHandler(errc, setpointc, mqttpublishc, conf)
+		go MqttHandler(errc, setpointc, conf)
 	}
 
 	// Start motion control handler to move the rotator

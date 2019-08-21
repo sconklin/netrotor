@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
+	"time"
 
 	"github.com/sconklin/netrotor/internal/config"
 	"github.com/yosssi/gmq/mqtt"
@@ -21,7 +22,12 @@ func azimuthValid(az float64) bool {
 	}
 }
 
-func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo, conf *config.Config) {
+func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, conf *config.Config) {
+
+	var lastAz float64
+	var deltap float64
+
+	timeLast := time.Now()
 
 	log.Info("MQTT New")
 	mqttClient := client.New(&client.Options{
@@ -96,22 +102,33 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo
 
 	for {
 		select {
-		case sp := <-mqttpubc:
-			/* Publish the azimuth */
-			textinfo := fmt.Sprintf("%5.1f", sp.Azimuth)
-			log.Infof(" MQTT Server: publishing %s", textinfo)
-			err = mqttClient.Publish(&client.PublishOptions{
-				QoS:       mqtt.QoS1,
-				TopicName: []byte(conf.MqttI.TopicRead),
-				Message:   []byte(textinfo),
-			})
-			if err != nil {
-				errc <- err
+		case <-time.After(1 * time.Second):
+			admutex.Lock()
+			azI := azvalue
+			admutex.Unlock()
+
+			timeLast = time.Now()
+			deltap = azI - lastAz
+			if deltap < 0 {
+				deltap = deltap * -1
 			}
-			/*
-				case <-time.After(100 * time.Millisecond):
-					break
-			*/
+
+			// Send position every 60 seconds or when it changes
+			if (deltap > 2) || (time.Now().Sub(timeLast) > (60 * time.Second)) {
+				lastAz = azI
+				timeLast = time.Now()
+				/* Publish the azimuth */
+				textinfo := fmt.Sprintf("%5.1f", azI)
+				log.Infof(" MQTT Server: publishing %s", textinfo)
+				err = mqttClient.Publish(&client.PublishOptions{
+					QoS:       mqtt.QoS1,
+					TopicName: []byte(conf.MqttI.TopicRead),
+					Message:   []byte(textinfo),
+				})
+				if err != nil {
+					errc <- err
+				}
+			}
 		}
 
 	}
