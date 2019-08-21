@@ -23,14 +23,16 @@ func azimuthValid(az float64) bool {
 
 func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo, conf *config.Config) {
 
+	log.Info("MQTT New")
 	mqttClient := client.New(&client.Options{
 		ErrorHandler: func(err error) {
-			fmt.Println(err)
+			errc <- err
 		},
 	})
 
 	defer mqttClient.Terminate()
 
+	log.Info("MQTT Cert")
 	// Read the certificate file.
 	b, err := ioutil.ReadFile("/etc/ssl/certs/ca-certificates.crt")
 	if err != nil {
@@ -49,6 +51,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo
 	ipstr := conf.MqttI.Broker + ":" + conf.MqttI.BrokerPort
 	log.Infof(" MQTT Server: %s", ipstr)
 
+	log.Info("MQTT Connect")
 	// Connect to the MQTT Server.
 	err = mqttClient.Connect(&client.ConnectOptions{
 		Network:   "tcp",
@@ -65,6 +68,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo
 	// Subscribe to two MQTT topic. Accept setpoint commands on one and
 	// publish Azimuth on the other
 
+	log.Info("MQTT Subscribe")
 	err = mqttClient.Subscribe(&client.SubscribeOptions{
 		SubReqs: []*client.SubReq{
 			&client.SubReq{
