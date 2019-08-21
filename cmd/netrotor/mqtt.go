@@ -68,7 +68,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, mqttpubc <-chan Rinfo
 	// Subscribe to two MQTT topic. Accept setpoint commands on one and
 	// publish Azimuth on the other
 
-	log.Info("MQTT Subscribe")
+	log.Infof("MQTT Subscribe to <%s>", conf.MqttI.TopicSet)
 	err = mqttClient.Subscribe(&client.SubscribeOptions{
 		SubReqs: []*client.SubReq{
 			&client.SubReq{
