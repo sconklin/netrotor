@@ -1,13 +1,13 @@
 [Unit]
 Wants=network-online.target
 After=network-online.target
+StartLimitBurst=5
+StartLimitIntervalSec=10
 
 [Service]
 Type=simple
 Restart=always
 RestartSec=1
-StartLimitBurst=5
-StartLimitIntervalSec=10
 User=pi
 ExecStart=/home/pi/go/src/github.com/sconklin/netrotor/cmd/netrotor/netrotor
 
