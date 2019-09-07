@@ -9,6 +9,7 @@
     "Network":
         {
 	    "n1mm_enable": "true",
+	    "net_mask": "255.255.255.255",
 	    "rotorrx":  "12040",
 	    "rotortx":  "13010",
 	    "statusrx": "12060"

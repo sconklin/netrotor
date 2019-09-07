@@ -25,6 +25,7 @@ type Rot struct {
 // Net Represents the network-associated configuration items
 type Net struct {
 	N1mmEnable string `json:"n1mm_enable"`
+	UdpNetMask string `json:"net_mask"`
 	RotorRx    string `json:"rotorrx"`  // N1MM RX port
 	RotorTx    string `json:"rotortx"`  // N1MM TX Port
 	StatusRx   string `json:"statusrx"` // N1MM Status Port
@@ -77,6 +78,7 @@ func DumpConfig(conf *Config) {
 	fmt.Printf("    Speed: %s\n", conf.Rotator.PortSpeed)
 	fmt.Printf("Network:\n")
 	fmt.Printf("    N1MM Enable:  %s\n", conf.Network.N1mmEnable)
+	fmt.Printf("    Net Mask:     %s\n", conf.Network.UdpNetMask)
 	fmt.Printf("    Rotor Rx:     %s\n", conf.Network.RotorRx)
 	fmt.Printf("    Rotor Tx:     %s\n", conf.Network.RotorTx)
 	fmt.Printf("    Status Rx:    %s\n", conf.Network.StatusRx)

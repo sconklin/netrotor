@@ -50,8 +50,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 	defer RxConn.Close()
 
 	// UDP TX setup
-	// TODO Make the netmask a config variable
-	txport := "255.255.255.255:" + conf.Network.RotorTx
+	txport := conf.Network.UdpNetMask + ":" + conf.Network.RotorTx
 
 	TxAddr, err := net.ResolveUDPAddr("udp", txport)
 	if err != nil {
