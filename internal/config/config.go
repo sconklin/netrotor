@@ -15,11 +15,7 @@ import (
 
 // Rotator Represents the config items required for a single rotator
 type Rot struct {
-	SerialEnable string `json:"serial_enable"`
-	Name         string `json:"name"`
-	Port         string `json:"port"`
-	PortSpeed    string `json:"port_speed"`
-	Model        string `json:"model"`
+	Name string `json:"name"`
 }
 
 // Net Represents the network-associated configuration items
@@ -73,9 +69,6 @@ func ReadConfig(jsonFileName string) (*Config, error) {
 func DumpConfig(conf *Config) {
 	fmt.Printf("Rotator:\n")
 	fmt.Printf("    Name:  %s\n", conf.Rotator.Name)
-	fmt.Printf("    Model: %s\n", conf.Rotator.Model)
-	fmt.Printf("    Port:  %s\n", conf.Rotator.Port)
-	fmt.Printf("    Speed: %s\n", conf.Rotator.PortSpeed)
 	fmt.Printf("Network:\n")
 	fmt.Printf("    N1MM Enable:  %s\n", conf.Network.N1mmEnable)
 	fmt.Printf("    Net Mask:     %s\n", conf.Network.UdpNetMask)

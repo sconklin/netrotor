@@ -1,10 +1,6 @@
 {
     "Rotator": {
-	    "serial_enable": "true",
-	    "name": "Rotor1",
-	    "port":"/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0",
-	    "port_speed":"4800",
-	    "model":"603" 
+	    "name": "Rotor1"
 	},
     "Network":
         {
