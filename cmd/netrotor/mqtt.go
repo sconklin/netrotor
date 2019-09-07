@@ -94,7 +94,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, conf *config.Config) 
 						} else {
 							log.Warnf(" MQTT RX Bad Azimuth: <%5.1f>", azimuth)
 						}
-						mqttsetc <- Rinfo{azimuth, "", "MQT", "Move"}
+						mqttsetc <- Rinfo{azimuth, conf.Rotator.Name, "MQT", "Move"}
 					}
 				},
 			},
