@@ -22,8 +22,10 @@ To make it start as a service, copy netrotor.service to /etc/systemd/system, the
 
 Then run the following:
 
+```
 $ sudo systemctl daemon-reload
 $ sudo systemctl enable netrotor.service
+```
 
 For N1MM, Port 12060 is used for status and 13010 is used for rotor updates
 
