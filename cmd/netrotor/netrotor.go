@@ -36,10 +36,11 @@ func main() {
 	var verbose = flag.Bool("v", false, "Enable verbose output")
 	flag.Parse()
 
-	logger.ChangePackageLogLevel("i2c", logger.InfoLevel)
-	logger.ChangePackageLogLevel("ads", logger.InfoLevel)
-	logger.ChangePackageLogLevel("lcd-backpack", logger.InfoLevel)
-	logger.ChangePackageLogLevel("relay", logger.InfoLevel)
+	logger.ChangePackageLogLevel("main", logger.WarnLevel)
+	logger.ChangePackageLogLevel("i2c", logger.WarnLevel)
+	logger.ChangePackageLogLevel("ads", logger.WarnLevel)
+	logger.ChangePackageLogLevel("lcd-backpack", logger.WarnLevel)
+	logger.ChangePackageLogLevel("relay", logger.WarnLevel)
 
 	// Using this
 	// https://stackoverflow.com/questions/15715605/multiple-goroutines-listening-on-one-channel
@@ -69,6 +70,11 @@ func main() {
 
 	if *verbose {
 		config.DumpConfig(conf)
+		logger.ChangePackageLogLevel("main", logger.InfoLevel)
+		logger.ChangePackageLogLevel("i2c", logger.InfoLevel)
+		logger.ChangePackageLogLevel("ads", logger.InfoLevel)
+		logger.ChangePackageLogLevel("lcd-backpack", logger.InfoLevel)
+		logger.ChangePackageLogLevel("relay", logger.InfoLevel)
 	}
 
 	// Start LCD handler to display messages

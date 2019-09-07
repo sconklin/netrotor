@@ -43,7 +43,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 
 	RxConn, err := net.ListenUDP("udp", RxAddr)
 	if err != nil {
-		log.Infof("ListenUDP Error: %v", err)
+		log.Errorf("ListenUDP Error: %v", err)
 		errc <- err
 	}
 
@@ -73,7 +73,7 @@ func N1MMHandler(errc chan<- error, Azc <-chan Rinfo, Spc chan<- Rinfo, conf *co
 		for {
 			_, _, err := RxConn.ReadFromUDP(buf)
 			if err != nil {
-				log.Infof("UDP RX Error: %v", err)
+				log.Errorf("UDP RX Error: %v", err)
 				errc <- err
 			}
 

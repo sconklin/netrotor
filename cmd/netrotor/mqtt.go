@@ -30,7 +30,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, conf *config.Config) 
 
 	timeLast := time.Now()
 
-	log.Info("MQTT New")
+	log.Debug("MQTT New")
 	mqttClient := client.New(&client.Options{
 		ErrorHandler: func(err error) {
 			errc <- err
@@ -39,7 +39,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, conf *config.Config) 
 
 	defer mqttClient.Terminate()
 
-	log.Info("MQTT Cert")
+	log.Debug("MQTT Cert")
 	// Read the certificate file.
 	b, err := ioutil.ReadFile("/etc/ssl/certs/ca-certificates.crt")
 	if err != nil {
@@ -58,7 +58,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, conf *config.Config) 
 	ipstr := conf.MqttI.Broker + ":" + conf.MqttI.BrokerPort
 	log.Infof(" MQTT Server: %s", ipstr)
 
-	log.Info("MQTT Connect")
+	log.Debug("MQTT Connect")
 	// Connect to the MQTT Server.
 	err = mqttClient.Connect(&client.ConnectOptions{
 		Network:   "tcp",
@@ -83,7 +83,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, conf *config.Config) 
 				QoS:         mqtt.QoS0,
 				// Define the processing of the message handler.
 				Handler: func(topicName, message []byte) {
-					log.Infof("MQTT RX <%s><%s>", string(topicName), string(message))
+					log.Debugf("MQTT RX <%s><%s>", string(topicName), string(message))
 					if strings.ToUpper(string(message)) == "STOP" {
 						log.Info(" MQTT RX Stop")
 						mqttsetc <- Rinfo{0.0, "", "MQT", "Stop"}
@@ -92,7 +92,7 @@ func MqttHandler(errc chan<- error, mqttsetc chan<- Rinfo, conf *config.Config) 
 						azimuth, _ = strconv.ParseFloat(string(message), 64)
 						if azimuthValid(azimuth) {
 						} else {
-							log.Infof(" MQTT RX Bad Azimuth: <%5.1f>", azimuth)
+							log.Warnf(" MQTT RX Bad Azimuth: <%5.1f>", azimuth)
 						}
 						mqttsetc <- Rinfo{azimuth, "", "MQT", "Move"}
 					}
