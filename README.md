@@ -6,8 +6,16 @@ A networked rotor controller
 [![GoDoc](https://godoc.org/github.com/sconklin/netrotor?status.svg)](https://godoc.org/github.com/sconklin/netrotor)
 [![MIT License](http://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-This is an Azimuth-only rotator control system that runs on a raspberry pi and allows control of the rotor from the network.
-It accepts the N1MM logger rotor control packets, and allows control via MQTT.
+This is an Azimuth-only rotator control system that runs on a raspberry pi and allows control of the rotor from the network. It's desiged to run on a raspberry pi with a four channel relay board, LCD display, and A/D converter all connected by I2C.
+
+It accepts the N1MM logger rotor control packets, and allows control and reporting via MQTT.
+
+There's a template configuration file named cmd/netrotor/rotorconf.json.template directory that should be copied to
+cmd/netrotor/rotorconf.json and customized to suit your installation.
+At a minimum, you should change:
+* The rotor name
+* The Mqtt topic names
+* The MQTT broker URL and login info
 
 
 To make it start as a service, copy netrotor.service to /etc/systemd/system, then edit that script to point to the gateway executable.

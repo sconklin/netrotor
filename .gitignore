@@ -1,4 +1,5 @@
 *~
 cmd/netrotor/netrotor
+cmd/netrotor/rotorconf.json
 cmd/turn/turn
 .travis.yml.save
